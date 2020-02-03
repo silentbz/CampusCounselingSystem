@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>我的通知</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../static/css/layui.css" media="all">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1127370_cekhekxq4ug.css" type="text/css"/>
+    <link rel="stylesheet" type="text/css" href="../../../static/css/main.css">
+    <link rel="shortcut icon" href="../../../static/images/logo_ico_128_128.ico" type="image/x-icon"/>
+    <script src="../../../static/js/jquery-1.11.3.min.js"></script>
+    <script src="../../../static/js/jquery-3.0.0.min.js"></script>
+
+
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #my_div {
+            text-align: right;
+
+        }
+
+        body {
+            /* background-color: rgb(214,214,214);*/
+
+        }
+    </style>
+</head>
+<body>
+
+{% include 'index/nav.html' %}
+
+<div style="float: left ;margin-left: 5%;width: 60%;">
+    <span class="layui-breadcrumb">
+     <span style="color: rgb(0,150,136)">您现在的位置是:  &nbsp;&nbsp;</span>
+     <a href="back_index">首页</a>
+    <a href="user_main_page">用户主页</a>
+    <a><cite>我的通知</cite></a>
+    <hr/>
+</span>
+    <br/>
+
+    <div>
+
+
+        <blockquote class="layui-elem-quote" style="margin-top: 10px;">
+            <div id="test2">通知信息</div>
+        </blockquote>
+
+
+        <table class="layui-table" lay-skin="line">
+            <colgroup>
+                <col width="150">
+                <col width="260">
+                <col width="120">
+                <col width="120">
+                <col width="120">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>编号</th>
+                <th>通知内容</th>
+                <th>状态</th>
+                <th>通知时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for notice in notice_info %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>{{ notice.notice_content }}</td>
+                    <td class="notice_status">{{ notice.notice_status }}</td>
+                    <td>{{ notice.notice_time|date:"Y/n/j" }}
+                        &nbsp;&nbsp;&nbsp;{{ notice.notice_time|time|cut:"." }}</td>
+                    <td>
+                        {% ifequal notice.notice_status "未读" %}
+                            <button class="layui-btn layui-btn-xs" notice_id="{{ notice.id }}" name="set_for_read">设为已读</button>
+                        {% endifequal %}
+                        <button class="layui-btn layui-btn-danger layui-btn-xs" notice_id="{{ notice.id }}"
+                                name="delete_notice">删除
+                        </button>
+
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div style="text-align: center;margin-left: 25%">
+            <div style="float: left">
+                <a class="layui-btn layui-btn-sm" href="my_notice?page_index=1">第一页</a>
+                {% if notice_info.has_previous %}
+                    <a class="layui-btn layui-btn-sm"
+                       href="my_notice?page_index={{ notice_info.previous_page_number }}">上一页</a>
+                {% endif %}
+                {% if notice_info.has_next %}
+                    <a class="layui-btn layui-btn-sm"
+                       href="my_notice?page_index={{ notice_info.next_page_number }}">下一页</a>
+                {% endif %}
+
+
+            </div>
+
+            <div style="float: left;">
+
+                <form style="float: left;" action="my_notice" method="get" name="notice_form">&nbsp;&nbsp;跳转至&nbsp;&nbsp;<input
+                        type="number" min="1" name="page_index"
+                        max="{{ notice_info.paginator.num_pages }}"
+                        oninput="if( this.value > {{ notice_info.paginator.num_pages }} )  this.value = {{ notice_info.paginator.num_pages }}"
+                        style="height: 25px;">&nbsp;&nbsp;页&nbsp;&nbsp;
+                     &nbsp;当前第 {{ notice_info.number }} 页&nbsp;&nbsp;
+                    &nbsp;共 {{ notice_info.paginator.num_pages }} 页&nbsp;&nbsp;
+                </form>
+                <a class="layui-btn layui-btn-sm"
+                   href="my_notice?page_index={{ notice_info.paginator.num_pages }}">最后一页</a>
+
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+
+
+<span class="layui-word-aux" id="test4"></span>
+</div>
+
+</div>
+<div class="site-demo-button" id="layerDemo" style="margin-bottom: 0;display: none;">
+    <button data-method="offset" data-type="auto" class="layui-btn layui-btn-normal" id="hint">居中弹出</button>
+</div>
+<script type="text/javascript" src="../../../static/layui/layui.js"></script>
+
+
+<script>
+    layui.use('element', function () {
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+        //监听导航点击
+        /*  element.on('nav(demo)', function(elem){
+         //console.log(elem)
+         layer.msg(elem.text());
+         });*/
+    });
+</script>
+<script type="text/javascript">
+    layui.config({
+        base: '../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        menu.init();
+        menu.off();
+        //menu.submit()
+    })
+</script>
+<script>
+    layui.use(['util', 'laydate', 'layer'], function () {
+        var util = layui.util
+
+            , layer = layui.layer;
+        //固定块
+        util.fixbar({
+            bar1: false
+            , bar2: '☺'
+            //,bar2:'#icon-robot'
+            , css: {right: 50, bottom: 100}
+            , bgcolor: '#393D49'
+            , click: function (type) {
+                if (type === 'bar1') {
+                    layer.msg('icon是可以随便换的')
+                } else if (type === 'bar2') {
+                    layer.msg('即将启动机器人...', {
+                        time: 10000, //2s后自动关闭
+                        btn: ['知道啦'],
+                        btnAlign: 'c',
+                        yes: function () {
+                            $('#chat_bot').click();
+                        }
+
+                    });
+
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            setTop: function () {
+                var that = this;
+                //窗口模式
+                layer.open({
+                    type: 2 //1 表示自定义内容 2表示使用iframe
+                    , title: '我的机器人'
+                    , area: [$(window).width() * 0.5 + 'px', $(window).height() * 0.7 + 'px']
+                    , shade: 0
+                    , id: 'ChatBotPage' //设定一个id，防止重复弹出
+                    , maxmin: true
+
+                    , offset: [ //为了演示，随机坐标
+                        $(window).height() * 0.15
+                        , $(window).width() * 0.3
+                    ]
+                    //  , resize: true //设置可以拉伸
+                    , content: 'chat_page_component'
+                });
+            }
+
+
+        };
+
+        $('.layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>
+<script>
+
+    // 按回车键触发事件 提交分页表单
+    $(document).keyup(function (event) {
+        if (event.keyCode == 13) {
+            var page_index = $("input[name='page_index']").val();
+
+
+            // 判断用户是否输入页码
+            if (page_index.trim() == "") {
+
+                $("#hint").click();
+                return;
+            }
+
+
+            $("form[name='resource_form']").submit();
+
+
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+
+        {% comment %}$(".layui-btn-xs").click(function () {
+            //通过按钮获得相应的notice_id值
+            var notice_id = $(this).attr("notice_id");
+            console.log(notice_id);
+            // 将notice_id 赋值到输入域
+            $("input[name='notice_id']").val(notice_id);
+            console.log('---------------------------');
+            //console.log($("input[name='dynamic_id']").val());
+            $("#notice_form").submit();
+
+        });{% endcomment %}
+    });
+
+
+</script>
+<script>
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            offset: function (othis) {
+                var type = othis.data('type')
+                    , text = "请输入页码";
+
+                layer.open({
+                    type: 1
+                    , offset: type
+
+                    , id: 'layerDemo' + type //防止重复弹出
+                    , content: '<div style="padding: 20px 80px;">' + text + '</div>'
+                    , btn: '关闭'
+                    , btnAlign: 'r' //按钮居右
+                    , shade: 0 //不显示遮罩
+                    , yes: function () {
+                        layer.closeAll();
+                    }
+                });
+            }
+        };
+
+        $('#layerDemo .layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("button[name='delete_notice']").click(function () {
+            var notice_id = $(this).attr("notice_id");
+            console.log(notice_id);
+            layer.msg('删除成功', {
+                icon: 6
+            });
+            $(this).parent().parent().remove();
+            delete_notice(notice_id);
+
+        });
+        $("button[name='set_for_read']").click(function () {
+            var notice_id = $(this).attr("notice_id");
+            console.log(notice_id);
+
+            // 改变通知状态
+            $(this).parent().parent().find(".notice_status").text("已读");
+            // 评论后将文本域清空
+            var notice_num = $("#notice_num").text();
+            if (notice_num - 1 == 0) {
+                $("#notice_num").remove();
+            } else {
+                $("#notice_num").text((notice_num - 1));
+            }
+
+
+            layer.msg('设置成功', {
+                icon: 6
+            });
+            $(this).remove();
+            set_notice_for_read(notice_id);
+        })
+    });
+    function set_notice_for_read(notice_id) {
+        $.ajax({
+            'type': "GET",
+            'data': {notice_id: notice_id},
+            'url': 'notice_set_for_read',  //访问的url地址
+            'dateType': 'json'  //想要获得的返回数据类型
+        }).success(function (data) {  //执行成功的回调函数（含有返回的数据（data））
+
+        });
+    }
+    function delete_notice(notice_id){
+        $.ajax({
+            'type': "GET",
+            'data': {notice_id: notice_id},
+            'url': 'delete_notice',
+            'dateType':'json'
+        }).success(function (data) {
+            
+        });
+    }
+</script>
+</body>
+</html>

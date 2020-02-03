@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Document</title>
+
+
+    <link rel="stylesheet" type="text/css" href="../../../static/css/main.css">
+
+    <script src="../../../static/js/jquery-3.0.0.min.js"></script>
+    <script src="../../../static/js/bootstrap.js"></script>
+    <script type="text/javascript" src="../../../static/layui/layui.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../static/layui/css/layui.css"/>
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #disabled_for_likes, disabled_for_comments {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body style="background-color:rgba(94,96,97,0.1)">
+<div class="content whisper-content">
+    <div class="cont">
+        <div class="whisper-list">
+            {% if  dynamic_info %}
+                {% for dynamic  in dynamic_info %}
+                    <div class="item-box">
+                        <div class="item">
+                            <div class="whisper-title">
+                            <span>
+                               {% if dynamic.user.user_img %}
+                                    <img src="{{ dynamic.user.user_img.url }}" class="layui-nav-img">
+                                {% else %}
+                                    <img src="//t.cn/RCzsdCq" class="layui-nav-img">
+                                {% endif %}
+                                <!--<img src="images/logo.png" width="40px" height="40px" style="vertical-align: middle;border-radius: 20px"/>-->
+                                <!--   <small>不忘初心 &nbsp;&nbsp;&nbsp;发布于</small> -->
+                                {{ dynamic.user.user_name }} &nbsp;&nbsp;&nbsp;发布于
+                            </span>
+                                <i class="layui-icon layui-icon-date"></i><span
+                                    class="hour">{{ dynamic.dynamic_time|time|cut:"." }}</span><span
+                                    class="date">{{ dynamic.dynamic_time|date:"Y/n/j" }}</span>
+                                <!--<br/>-->
+                            </div>
+                            <p class="text-cont" style="color: whitesmoke">
+
+                                {{ dynamic.dynamic_content }}
+                            </p>
+
+                            {% if dynamic.dynamic_img %}
+                                <div class="img-box">
+                                    <img src="{{ dynamic.dynamic_img.url }}" style="width: 480px;height: 320px;">
+                                </div>
+                            {% endif %}
+                            <div class="op-list">
+                                <!-- 判断用户是否点赞过该动态 如点赞了那就呈现点赞样式 -->
+
+                                {% ifequal dynamic.like_status user.id %}
+                                    {% if user.id %}
+                                        <p class="like active" dynamic_id="{{ dynamic.id }}"><i
+                                                class="layui-icon layui-icon-praise"></i><span>{{ dynamic.dynamic_likes }}</span>
+                                        </p>
+                                    {% else %}
+                                        <p class="like" id="disabled_for_likes"><i
+                                                class="layui-icon layui-icon-praise"></i><span>{{ dynamic.dynamic_likes }}</span>
+                                        </p>
+                                    {% endif %}
+                                {% else %}
+                                    <p class="like" dynamic_id="{{ dynamic.id }}"><i
+                                            class="layui-icon layui-icon-praise"></i><span>{{ dynamic.dynamic_likes }}</span>
+                                    </p>
+                                {% endifequal %}
+
+                                <p class="edit" id="disabled_for_comments"><i
+                                        class="layui-icon layui-icon-reply-fill"></i><span>{{ dynamic.dynamic_comments }}</span>
+                                </p>
+                                <!-- 用户只能删除自己发的动态 -->
+                                {% ifequal dynamic.user.id user.id %}
+                                    <p style="padding-left: 10%" dynamic_id="{{ dynamic.id }}" id="delete_dynamic">
+                                        <span>删除</span><i
+                                            class="layui-icon layui-icon-delete"></i>
+                                    </p>
+                                {% endifequal %}
+                                <p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p>
+                            </div>
+                        </div>
+                        <div class="review-version layui-hide">
+                            <!-- 用户登录后才可以评论 -->
+                            {% if user.id %}
+                                <div class="form">
+
+                                    {% if user.user_img %}
+                                        <img src="{{ user.user_img.url }}" class="layui-nav-img">
+                                    {% else %}
+                                        <img src="../../../static/images/default_img.jpg" class="layui-nav-img">
+                                    {% endif %}
+
+                                    <div class="layui-form">
+                                        <div class="layui-form-item layui-form-text">
+                                            <div class="layui-input-block">
+                                                <textarea name="user_comment" class="layui-textarea"
+                                                          placeholder="说点什么吧..."
+                                                          style="background: rgba(78,85,95,0.1);color: whitesmoke"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="layui-form-item">
+                                            <div class="layui-input-block" style="text-align: right;">
+                                                <button class="layui-btn layui-btn-warm" id="submit_comment"
+                                                        dynamic_id="{{ dynamic.id }}">确定
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="list-cont">
+
+                                {% for comments in   all_comments.values %}
+                                    {% for comment in comments %}
+                                        <!-- 保证只加载本动态下的所有评论 -->
+                                        {% ifequal comment.dynamic_info dynamic %}
+
+                                            <div class="cont">
+                                                <div class="img">
+                                                    {% if comment.critic_img %}
+                                                        <img src="{{ comment.critic_img.url }}" alt=""
+                                                             class="layui-nav-img">
+                                                    {% else %}
+                                                        <img src="../../../static/images/default_img.jpg" alt=""
+                                                             class="layui-nav-img">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="text">
+                                                    <p class="tit"><span class="name"
+                                                                         style="color: whitesmoke">{{ comment.critic_name }}</span><span
+                                                            class="data"
+                                                            style="color: whitesmoke">{{ comment.comment_time|date:"Y/n/j" }}</span>
+                                                    </p>
+                                                    <p class="ct"
+                                                       style="color: whitesmoke">{{ comment.comment_content }}</p>
+                                                </div>
+                                            </div>
+                                        {% endifequal %}
+                                    {% endfor %}
+                                {% endfor %}
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+                {% endfor %}
+                <!-- 如果没有动态信息就提示用户-->
+            {% else %}
+                <h1 style="color: white">没有找到相应的动态内容哟</h1>
+                <img src="../../../static/images/404.jpg" style="width: 750px;height: 420px;">
+            {% endif %}
+
+        </div>
+
+        {% if dynamic_info %}
+            <div id="demo" style="text-align: center;"></div>
+        {% endif %}
+    </div>
+</div>
+
+<script type="text/javascript">
+    layui.config({
+        base: '../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu', 'flow'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        flow = layui.flow;
+
+        laypage.render({
+//      elem: 'demo'
+            count: 70 //数据总数，从服务端得到
+        });
+        /*  flow.load({
+
+         elem: '#LAY_demo1' //流加载容器
+         //             ,scrollElem: '#LAY_demo1' //滚动条所在元素，一般不用填，此处只是演示需要。
+         ,done: function(page, next){ //执行下一页的回调
+
+         //模拟数据插入
+         setTimeout(function(){
+
+         var lis = [];
+         for(var i = 0; i < 2; i++){
+         //                        lis.push('<div class="item-box"><div class="item"><div class="whisper-title"><i class="layui-icon layui-icon-date"></i><span class="hour">12:25</span><span class="date">2018/06/08</span></div><p class="text-cont">大学里最美好的记忆-图书馆</p><div class="img-box"><img src="images/library.gif"></div><div class="op-list"><p class="like"><i class="layui-icon layui-icon-praise"></i><span>1200</span></p><p class="edit"><i class="layui-icon layui-icon-reply-fill"></i><span>1200</span></p><p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p></div></div><div class="review-version layui-hide"><div class="form"><img src="images/header2.png"><form class="layui-form" action=""><div class="layui-form-item layui-form-text"><div class="layui-input-block"><textarea name="desc" class="layui-textarea"></textarea></div></div><div class="layui-form-item"><div class="layui-input-block" style="text-align: right;"><button class="layui-btn definite">確定</button></div></div></form></div><div class="list-cont"><div class="cont"><div class="img"><img src="images/header.png" alt=""></div><div class="text"><p class="tit"><span class="name">吳亦凡</span><span class="data">2018/06/06</span></p><p class="ct">我也是，甚是想念！</p></div></div> </div></div></div>')
+         lis.push('<div class="cont"><div class="whisper-list" ><div class="item-box"><div class="item"><div class="whisper-title"><i class="layui-icon layui-icon-date"></i><span class="hour">12:25</span><span class="date">2018/06/08</span></div><p class="text-cont">大学里最美好的记忆-图书馆</p><div class="img-box"><img src="../../static/images/library.gif"></div><div class="op-list"><p class="like"><i class="layui-icon layui-icon-praise"></i><span>1200</span></p><p class="edit"><i class="layui-icon layui-icon-reply-fill"></i><span>1200</span></p><p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p></div></div><div class="review-version layui-hide"><div class="form"><img src="../../static/images/header2.png"><form class="layui-form" action=""><div class="layui-form-item layui-form-text"><div class="layui-input-block"><textarea name="desc" class="layui-textarea"></textarea></div></div><div class="layui-form-item"><div class="layui-input-block" style="text-align: right;"><button class="layui-btn definite">確定</button></div></div></form></div><div class="list-cont"><div class="cont"><div class="img"><img src="../../static/images/header.png" alt=""></div><div class="text"><p class="tit"><span class="name">吳亦凡</span><span class="data">2018/06/06</span></p><p class="ct">我也是，甚是想念！</p></div></div> </div></div></div></div></div>')
+         //                        lis.push('<h1 class="test">this is h1</h1>')
+         }
+
+         //执行下一页渲染，第二参数为：满足“加载更多”的条件，即后面仍有分页
+         //pages为Ajax返回的总页数，只有当前页小于总页数的情况下，才会继续出现加载更多
+         next(lis.join(''), page < 10); //假设总页数为 10
+         }, 500);
+         }
+
+         });
+         */
+        menu.init();
+        menu.off();
+        //menu.submit()
+    })
+</script>
+</body>
+</html>

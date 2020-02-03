@@ -1,0 +1,66 @@
+<ul class="layui-nav">
+    <div id="my_div">
+        <li class="layui-nav-item" style="float: left">
+            <a href="back_index">
+
+                <img src="../../../static/images/logo.png" width="40px" height="40px"
+                     style="vertical-align: middle;border-radius: 20px"/>
+
+                <span>Welcome To NanChang HongKong University</span>
+            </a>
+        </li>
+
+        {% comment %} <li class="layui-nav-item layui-this"><a href="">产品</a></li>{% endcomment %}
+
+        <li class="layui-nav-item"><a href="admin_index">用户管理</a></li>
+        <li class="layui-nav-item"><a href="resource_manage">资源管理</a></li>
+
+        <li class="layui-nav-item">
+            <a href="javascript:;">新闻管理</a>
+            <dl class="layui-nav-child">
+
+                <dd><a href="check_school_news">查看新闻</a></dd>
+                <dd><a href="submit_school_news">发布新闻</a></dd>
+
+            </dl>
+        </li>
+        <li class="layui-nav-item">
+            <a href="javascript:;">版块管理</a>
+            <dl class="layui-nav-child">
+                <dd><a href="check_dynamic_topic">查看版块</a></dd>
+                <dd><a href="add_dynamic_topic">添加版块</a></dd>
+
+            </dl>
+        </li>
+        <li class="layui-nav-item">
+            <a href="javascript:;">地图标注管理</a>
+            <dl class="layui-nav-child">
+                <dd><a href="check_map_label">查看标注</a></dd>
+                <dd><a href="add_map_label">添加标注</a></dd>
+
+            </dl>
+        </li>
+
+
+        <li class="layui-nav-item" lay-unselect="">
+            <a href="javascript:;">
+                {% if admin.admin_img %}
+                    <img src="{{ admin.admin_img.url }}" class="layui-nav-img">
+                {% else %}
+                    <img src="../../../static/images/default_img.jpg" class="layui-nav-img">
+                {% endif %}
+                {{ admin.admin_name }}</a>
+            <dl class="layui-nav-child">
+                <dd><a href="change_admin_img">修改头像</a></dd>
+                <dd><a href="change_admin_password">修改密码</a></dd>
+                <dd><a href="exit">退出</a></dd>
+            </dl>
+        </li>
+
+    </div>
+</ul>
+
+
+<br/><br/>
+
+<button data-method="setTop" id="chat_bot" style="display: none" class="layui-btn">机器人</button>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加标注</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #place_detail_info li {
+
+            /*display: inline-block;*/
+        }
+
+        /*隐藏地址列表信息*/
+        .hide_place_info {
+            display: none;
+
+        }
+
+        #place_detail_info li a {
+
+            /*color:rgb(193,194,198)*/
+            color: white
+        }
+
+        #place_detail_info li a:hover {
+            list-style: none;
+            cursor: hand;
+            /*display: inline-block;*/
+            color: rgb(30, 159, 255)
+        }
+
+        .myclass {
+            background-color: rgb(102, 102, 102);
+        }
+
+        #my_div {
+            text-align: right;
+        }
+
+        #panorama {
+            width: 100%;
+            height: 92vh;
+        }
+
+
+    </style>
+    <link rel="stylesheet" type="text/css" href="../../../../static/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="../../../../static/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="../../../../static/css/bootstrap-theme.css">
+    <link rel="stylesheet" type="text/css" href="../../../../static/css/bootstrap.min.css">
+
+    <link rel="shortcut icon" href="../../../../static/images/logo_ico_128_128.ico" type="image/x-icon"/>
+
+    <link rel="stylesheet" type="text/css" href="../../../../static/css/main.css">
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <script src="../../../../static/js/jquery-3.0.0.min.js"></script>
+    <script src="../../../../static/js/bootstrap.js"></script>
+
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=2.0&ak=biSevYB7qpodd6tsVvuCSYVZGs3O8A9V"></script>
+    <script type="text/javascript" src="../../../../static/layui/layui.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../../static/layui/css/layui.css"/>
+</head>
+<body>
+
+{% include "admin/admin_nav.html" %}
+
+
+<div id="panorama"></div>
+<!-- 隐藏按钮 当用户点击地点标签时候能够将标签弹出-->
+<button data-method="confirmTrans" id="place_info" style="display: none" class="layui-btn">地点框</button>
+<div class="site-demo-button" id="layerDemo" style="margin-bottom: 0;display: none;">
+    <button data-method="offset" data-type="auto" class="layui-btn layui-btn-normal" id="hint">居中弹出</button>
+</div>
+<div id="form_container" style="display: none">
+
+    <form class="layui-form" action="add_map_label_process" method="post" id="my_place_form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">标注名</label>
+            <div class="layui-input-block">
+                <input type="text" name="label_name" lay-verify="title" autocomplete="off" placeholder="请输入标注名"
+                       class="layui-input" style="color: black;" oninput="get_value(event)" id="the_add_value">
+            </div>
+        </div>
+        <div>
+
+            <input type="text" name="longitude" id="longitude" style="display: none">
+
+        </div>
+        <div>
+            <div>
+                <input type="text" name="latitude" id="latitude" style="display: none">
+            </div>
+        </div>
+        <div>
+            <div>
+                <input type="text" name="horizontal_angle" id="horizontal_angle" style="display: none">
+            </div>
+        </div>
+        <div>
+            <div>
+                <input type="text" name="vertical_angle" id="vertical_angle" style="display: none">
+            </div>
+        </div>
+
+    </form>
+</div>
+<div id="places_container" class="hide_place_info">
+    <ul id="place_detail_info">
+        {% for place in all_places %}
+            <li><a href="javascript:dynamic_info('{{ place.place_name }}')">{{ forloop.counter }}.{{ place.place_name }}</a>
+            </li>
+            <hr/>
+        {% endfor %}
+
+    </ul>
+</div>
+</body>
+</html>
+
+
+<script>
+    var flag = 0;
+    var panorama = new BMap.Panorama('panorama', {
+        albumsControl: false, //默认为不显示相册控件，默认值为false
+        linksControl: true, //隐藏道路指示控件
+        navigationControl: false //隐藏导航控件
+    });
+    var longitude = 0;//经度
+    var latitude = 0;//纬度
+    var vertical_angle = 0;//仰俯角度 对应pitch
+    var horizontal_angle = 0;//水平角度 对应heading
+    $(document).ready(function () {
+        panorama.setPov({  //修改点的视角
+            pitch: 22.62497399117345,  //垂直视角（俯仰角）
+            heading: 267.97925961405264 //水平视角（偏航角）
+        });
+        panorama.setPosition(new BMap.Point(115.835695, 28.657046));
+
+        //panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_CATERING); //餐饮
+        //  panorama.setPov({pitch: 6, heading: 138});
+
+        panorama.addEventListener('position_changed', function () { //全景位置改变事件
+            panoramaCallBack();
+        });
+        panorama.addEventListener('pov_changed', function () { //全景视角改变事件
+            panoramaCallBack();
+        });
+
+        {% for place in all_places %}
+            var label = new BMap.Point({{ place.longitude }}, {{ place.latitude }});//定义label的坐标点
+            var tag = {
+                position: label,
+                altitude: {{ place.label_height }}
+
+            };//设置标注点的经纬度位置和高度
+            var label_tag = new BMap.PanoramaLabel('{{ place.place_name }}', tag);
+            panorama.addOverlay(label_tag);//在全景地图里添加该标注
+            panorama.setPov(label_tag.getPov());//修改点的视角 朝向该label
+            label_tag.addEventListener('click', function () {
+                flag = 1; //点击导航栏的地点 确保精确定位
+                panorama.setPosition(new BMap.Point({{ place.longitude }}, {{ place.latitude }}));
+
+                $("#place_info").click();
+                dynamic_info('{{ place.place_name }}');
+
+
+            });
+
+            panorama.addEventListener('position_changed', function (e) {
+                if(flag==1) { //确保点击地图位置改变并且点击了导航栏的地点或相应的labels标注 才能触发下面事件
+                    console.log("panorama position_changed----->flag：" + flag);
+                    panorama.setPov({  //修改点的视角
+
+                        pitch: {{ place.vertical_angle }},    // 俯仰角
+                        heading: {{ place.horizontal_angle }} //偏航角
+
+
+                    });
+                    flag = 0;
+                }
+
+            });//全景位置改变事件
+
+        {% endfor %}
+    });
+
+    function panoramaCallBack() { //事件回调函数
+        longitude = panorama.getPosition().lng;
+        latitude = panorama.getPosition().lat;
+        horizontal_angle = panorama.getPov().heading;
+        vertical_angle = panorama.getPov().pitch;
+        //console.log("经度---->" + longitude + "\n纬度------------>" + latitude);
+        //console.log("偏航角------->" + horizontal_angle + "\n仰俯角------>" + vertical_angle);
+        $("#longitude").val(longitude);
+        $("#latitude").val(latitude);
+        $("#horizontal_angle").val(horizontal_angle);
+        $("#vertical_angle").val(vertical_angle);
+
+        //alert(longitude+"  "+latitude+"  "+horizontal_angle+"  "+vertical_angle);
+        //alert("全景位置点为：" + panorama.getPosition().lng + "," + panorama.getPosition().lat + panorama.getPov().heading + "," + panorama.getPov().pitch);
+
+    }
+
+</script>
+
+
+<script>
+
+    layui.config({
+        base: '../../../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu'], function () {
+
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+
+        menu.init();
+        menu.off();
+        menu.submit();
+    });
+
+
+</script>
+<script src="../../../../static/layui/layui.js" charset="utf-8"></script>
+<script>
+    window.onload = function () {
+        $(".pano_pc_indoor_exit").attr("style", "display:none");
+        $("#place_info").click();
+
+    }
+</script>
+
+<script>
+
+    var place_value = '';
+    //得到标注值
+    var the_add_value = "";
+    function get_value(event) {
+        the_add_value = event.target.value;
+
+        $("#the_add_value").val(the_add_value);
+
+
+    }
+    function submit_form() {
+        if (the_add_value == "") {
+            alert("请将输入标注信息");
+            return;
+        }
+
+        $("#my_place_form").submit();
+    }
+    function dynamic_info(val) {
+        // 在打开新的iframe时 先将之前的iframe全部关闭 保证最后只有一个iframe显示
+        layui.layer.closeAll('iframe');
+        flag = 1;
+        $("#place_info").click();
+        place_value = val;
+        switch (val) {
+            {% for place in all_places %}
+                case '{{ place.place_name }}':
+
+                    panorama.setPosition(new BMap.Point({{ place.longitude }}, {{ place.latitude }}));
+
+                    panorama.setPov({  //修改点的视角
+
+                        pitch: {{ place.vertical_angle }},    // 俯仰角
+                        heading: {{ place.horizontal_angle }} //偏航角
+
+
+                    });
+
+                    break;
+            {% endfor %}
+
+        }
+        $("#dynamic_info").click();
+    }
+
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            offset: function (othis) {
+                var type = othis.data('type')
+                    , text = "居中弹出";
+
+                layer.open({
+                    type: 1
+                    , offset: type
+
+                    , id: 'layerDemo' + type //防止重复弹出
+                    , skin: 'layui-layer-hui'
+                    , area: [$(window).width() * 0.45 + 'px', $(window).height() * 0.25 + 'px']
+
+                    , content: $("#form_container").html()
+                    , btn: '添加'
+                    , btnAlign: 'r' //按钮居右
+                    , shade: 0 //不显示遮罩
+                    , yes: function () {
+                        submit_form();//提交表单
+                    }
+                });
+            },
+            confirmTrans: function () {
+                //配置一个透明的询问框
+                layer.msg($("#places_container").html(), {
+                    area: [$(window).width() * 0.25 + 'px', $(window).height() * 0.65 + 'px'],
+                    time: 2000000, //2000s后自动关闭
+                    //title: ["places", "background:rbg(71,76,82);color:white;text-align:center"],
+                    offset: 'l',//对话框向左居中,
+                    move: '.layui-layer-title',
+                    //anim: 0平滑放大（默认）1从上掉落 2从最底部往上滑入 3从左滑入 4从左翻滚  5渐显 6抖动
+
+
+                    anim: 1,
+                    btn: ['添加标注', '关闭'],
+                    yes: function () {
+                        $("#hint").click();
+                        // alert("添加成功")
+
+                    },
+                    btn2: function () {
+                        layer.closeAll();//关闭所有弹框
+                    }
+
+                });
+
+            }
+
+
+        };
+
+        $('.layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>

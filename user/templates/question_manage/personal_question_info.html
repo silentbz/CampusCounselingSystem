@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>我的提问</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../static/css/layui.css" media="all">
+    <link rel="shortcut icon" href="../../../static/images/logo_ico_128_128.ico" type="image/x-icon"/>
+
+    <link rel="stylesheet" type="text/css" href="../../../static/css/main.css">
+    <script src="../../../static/js/jquery-3.0.0.min.js"></script>
+    <script src="../../../static/js/upload_picture.js"></script>
+    <link rel="stylesheet" href="../../../static/share/css/share.min.css">
+    <script src="http://apps.bdimg.com/libs/jquery/1.8.2/jquery.js"></script>
+    <script src="../../../static/share/js/jquery.share.min.js"></script>
+    <!--加载meta IE兼容文件-->
+
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #my_div {
+            text-align: right;
+        }
+
+        body {
+            /* background-color: rgb(214,214,214);*/
+        }
+    </style>
+</head>
+<body>
+
+
+{% include 'index/nav.html' %}
+
+<div style="float: left;margin-left: 6%;width: 60%">
+    <span class="layui-breadcrumb">
+     <span style="color: rgb(0,150,136)">您现在的位置是:  &nbsp;&nbsp;</span>
+     <a href="back_index">首页</a>
+    <a href="user_main_page">用户主页</a>
+    <a><cite>我的提问</cite></a>
+</span>
+    <hr/>
+
+
+
+    {% if question_info %}
+    {% else %}
+        <blockquote class="layui-elem-quote" style="margin-top: 10px;">
+            <div id="test2">你暂无发出问题哟</div>
+        </blockquote>
+    {% endif %}
+    <div class="content whisper-content">
+        <div class="cont">
+            <div class="whisper-list">
+                {% for question  in question_info %}
+                    <div class="item-box">
+                        <div class="item">
+                            <div class="whisper-title">
+                            <span>
+                               {% if question.user.user_img %}
+                                   <img src="{{ question.user.user_img.url }}" class="layui-nav-img">
+                               {% else %}
+                                   <img src="//t.cn/RCzsdCq" class="layui-nav-img">
+                               {% endif %}
+                                <!--<img src="images/logo.png" width="40px" height="40px" style="vertical-align: middle;border-radius: 20px"/>-->
+                                <!--   <small>不忘初心 &nbsp;&nbsp;&nbsp;发布于</small> -->
+                                {{ question.user.user_name }} &nbsp;&nbsp;&nbsp;发出于
+                            </span>
+                                <i class="layui-icon layui-icon-date"></i><span
+                                    class="hour">{{ question.question_time|time|cut:"." }}</span><span
+                                    class="date">{{ question.question_time|date:"Y/n/j" }}</span>
+                                <!--<br/>-->
+                            </div>
+                            <p class="text-cont">
+
+                                {{ question.question_content }}
+                            </p>
+                            <!-- 有图片就加载 无图片就不加载-->
+                            {% if question.question_img %}
+                                <div class="img-box">
+                                    <img src="{{ question.question_img.url }}" style="width: 480px;height: 320px;">
+                                </div>
+                            {% endif %}
+                            <div class="op-list">
+                                <!-- 得到问题回复数目 -->
+
+
+                                <p class="edit"><i
+                                        class="layui-icon layui-icon-reply-fill"></i><span
+                                        class="reply-numbers">{{ question.question_replies }}</span>
+                                </p>
+
+                                <p style="padding-left: 10%" question_id="{{ question.id }}" name="share"><i
+                                        class="layui-icon layui-icon-share"></i><span></span>
+                                </p>
+
+                                <!-- 用户只能删除自己发的动态 -->
+                                {% ifequal question.user.id user.id %}
+                                    <p style="padding-left: 10%" question_id="{{ question.id }}"
+                                       class="delete_question">
+                                        <span>删除</span><i
+                                            class="layui-icon layui-icon-delete"></i>
+                                    </p>
+                                {% endifequal %}
+                                <p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p>
+                            </div>
+                        </div>
+                        <div class="review-version layui-hide">
+
+
+                            <div class="list-cont" id="lists">
+
+                                {% for replies in   all_replies.values %}
+                                    {% for reply in replies %}
+                                        <!-- 保证只加载本问题下的所有回复 -->
+                                        {% ifequal reply.question question %}
+
+                                            <div class="cont">
+
+                                                <div class="img">
+                                                    {% if reply.responses_img %}
+                                                        <img src="{{ reply.responses_img.url }}" alt=""
+                                                             class="layui-nav-img">
+                                                    {% else %}
+                                                        <img src="../../../static/images/default_img.jpg" alt=""
+                                                             class="layui-nav-img">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="text">
+                                                    <p class="tit"><span
+                                                            class="name">{{ reply.responses_name }}</span><span
+                                                            class="data">{{ reply.reply_time|date:"Y/n/j" }}</span></p>
+                                                    <p class="ct">{{ reply.reply_content }}</p>
+                                                </div>
+                                            </div>
+                                        {% endifequal %}
+                                    {% endfor %}
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<button data-method="offset" data-type="t" class="layui-btn layui-btn-normal" id="share_button" style="display: none">
+    上弹出
+</button>
+<script type="text/javascript" src="../../../static/layui/layui.js"></script>
+
+
+<!--   -->
+<script>
+    layui.use('element', function () {
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+    });
+</script>
+<script type="text/javascript">
+    layui.config({
+        base: '../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        menu.init();
+        menu.off();
+        //menu.submit()
+    })
+</script>
+<script>
+    layui.use(['util', 'laydate', 'layer'], function () {
+        var util = layui.util
+
+            , layer = layui.layer;
+        //固定块
+        util.fixbar({
+            bar1: false
+            , bar2: '☺'
+            //,bar2:'#icon-robot'
+            , css: {right: 50, bottom: 100}
+            , bgcolor: '#393D49'
+            , click: function (type) {
+                if (type === 'bar1') {
+                    layer.msg('icon是可以随便换的')
+                } else if (type === 'bar2') {
+                    layer.msg('即将启动机器人...', {
+                        time: 10000, //2s后自动关闭
+                        btn: ['知道啦'],
+                        btnAlign: 'c',
+                        yes: function () {
+                            $('#chat_bot').click();
+                        }
+
+                    });
+
+                }
+            }
+        });
+    });
+</script>
+
+
+<script>
+    var question_id;
+    $(document).ready(function () {
+        $(".like").click(function () {
+            var dynamic_id = $(this).attr("dynamic_id");
+            var class_val = $(this).attr("class");
+            console.log(class_val);
+            console.log(dynamic_id);
+            like(dynamic_id, class_val);
+        });
+        $(".delete_question").click(function () {
+            var question_id = $(this).attr("question_id");
+            console.log(question_id);
+            delete_question($(this).parent().parent().parent(), question_id);
+            // $(this).parent().parent().parent() 表示当前的item_box
+
+        });
+        $("p[name='share']").click(function () {
+            var questions_id = $(this).attr("question_id");
+            console.log(questions_id);
+            question_id = questions_id;
+            $("#share_button").click();
+        });
+
+
+    });
+    //删除问题
+    function delete_question(item_box, question_id) {
+        layer.confirm('确定要删除吗?', {
+            btnAlign: 'c'
+        }, function (index) {
+            //点击确定后的回调
+            //do something
+            item_box.remove();
+            $.ajax({
+                'url': 'delete_question?question_id=' + question_id,  //访问的url地址
+                'dateType': 'json'  //想要获得的返回数据类型
+            }).success(function (data) {  //执行成功的回调函数（含有返回的数据（data））
+                console.log('删除成功');
+            });
+            layer.close(index);
+        });
+
+    }
+
+
+</script>
+<script>
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            setTop: function () {
+                var that = this;
+                //窗口模式
+                layer.open({
+                    type: 2 //1 表示自定义内容 2表示使用iframe
+                    , title: '我的机器人'
+                    , area: [$(window).width() * 0.5 + 'px', $(window).height() * 0.7 + 'px']
+                    , shade: 0
+                    , id: 'ChatBotPage' //设定一个id，防止重复弹出
+                    , maxmin: true
+
+                    , offset: [ //为了演示，随机坐标
+                        $(window).height() * 0.15
+                        , $(window).width() * 0.3
+                    ]
+                    //  , resize: true //设置可以拉伸
+                    //,content:'<div class="content whisper-content"><div class="cont"><div class="whisper-list"><div class="item-box"><div class="item"><div class="whisper-title"><i class="layui-icon layui-icon-date"></i><span class="hour">12:25</span><span class="date">2018/06/08</span></div><p class="text-cont">大学经常待的地方-图书馆</p><div class="img-box"><img src="../../static/images/library.gif"></div><div class="op-list"><p class="like"><i class="layui-icon layui-icon-praise"></i><span>1200</span></p><p class="edit"><i class="layui-icon layui-icon-reply-fill"></i><span>1200</span></p><p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p></div></div><div class="review-version layui-hide"><div class="form"><img src="../../static/images/header2.png"><form class="layui-form" action=""><div class="layui-form-item layui-form-text"><div class="layui-input-block"><textarea name="desc" class="layui-textarea"></textarea></div></div><div class="layui-form-item"><div class="layui-input-block" style="text-align: right;"><button class="layui-btn definite">確定</button></div></div></form></div><div class="list-cont"><div class="cont"><div class="img"><img src="../../static/images/header.png" alt=""></div><div class="text"><p class="tit"><span class="name">吳亦凡</span><span class="data">2018/06/06</span></p><p class="ct">敢问大师，师从何方？上古高人呐逐一地看完你的作品后，我的心久久 不能平静！这世间怎么可能还有如此精辟的作品？我不敢相信自己的眼睛。自从改革开放以后，我就以为再也不会有任何作品能打动我，没想到今天看到这个如此精妙绝伦的作品好厉害！</p></div></div> </div></div></div></div></div></div>'
+                    , content: 'chat_page_component'
+                });
+            }
+            , offset: function (othis) {
+                var type = othis.data('type')
+                    , text = "分享至";
+
+                layer.open({
+                    type: 2
+                    , title: "分享至"
+                    , offset: [ //为了演示，随机坐标
+                        $(window).height() * 0.15
+
+                    ] //具体配置参考：http://www.layui.com/doc/modules/layer.html#offset
+                    , id: 'layerDemo' + type //防止重复弹出
+                    , area: [$(window).width() * 0.4 + 'px', $(window).height() * 0.35 + 'px']
+                    , skin: 'layui-layer-hui'
+
+                    , content: 'question_share?question_id=' + question_id
+                    //, btn: '关闭全部'
+                    //, btnAlign: 'r' //按钮居中
+                    , shade: 0 //不显示遮罩
+                    , yes: function () {
+                        layer.closeAll();
+                    }
+                });
+            }
+
+
+        };
+
+        $('.layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>上传资源</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../static/css/layui.css" media="all">
+    <link rel="shortcut icon" href="../../../static/images/logo_ico_128_128.ico" type="image/x-icon" />
+
+    <link rel="stylesheet" type="text/css" href="../../../static/css/main.css">
+    <script src="../../../static/js/jquery-3.0.0.min.js"></script>
+    <script src="../../../static/js/upload_picture.js"></script>
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #my_div {
+            text-align: right;
+        }
+
+        body {
+            /* background-color: rgb(214,214,214);*/
+        }
+    </style>
+</head>
+<body>
+
+
+{% include 'index/nav.html' %}
+
+<div style="float: left;margin-left: 6%;width: 60%">
+    <span class="layui-breadcrumb">
+     <span style="color: rgb(0,150,136)">您现在的位置是:  &nbsp;&nbsp;</span>
+     <a href="back_index">首页</a>
+    <a href="user_main_page">用户主页</a>
+    <a><cite>上传资源</cite></a>
+</span>
+    <hr/>
+    <form class="layui-form"  >
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="width: 56px;padding-left: 0">所属类型</label>
+            <div class="layui-input-block">
+                <select name="resource_type">
+                    <option value=""></option>
+                    <option value="教育资源">教育资源</option>
+                    <option value="专业资料">专业资料</option>
+                    <option value="IT资料">IT资料</option>
+                    <option value="娱乐生活">娱乐生活</option>
+                    <option value="经济管理">经济管理</option>
+                    <option value="办公文书">办公文书</option>
+
+                </select>
+            </div>
+        </div>
+
+
+    </form>
+     <br/>
+    <div class="layui-upload">
+        <button type="button" class="layui-btn layui-btn-normal" id="testList">选择多文件</button>
+        <div class="layui-upload-list">
+            <table class="layui-table">
+                <thead>
+                <tr>
+                    <th>文件名</th>
+                    <th>大小</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="demoList"></tbody>
+            </table>
+        </div>
+        <button type="button" class="layui-btn" id="testListAction">开始上传</button>
+    </div>
+</div>
+
+<script type="text/javascript" src="../../../static/layui/layui.js"></script>
+
+
+<!--   -->
+<script>
+    layui.use('element', function () {
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        //监听导航点击
+       {% comment %} element.on('nav(demo)', function (elem) {
+            //console.log(elem)
+            layer.msg(elem.text());
+        });{% endcomment %}
+    });
+</script>
+<script type="text/javascript">
+    layui.config({
+        base: '../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        menu.init();
+        menu.off();
+        menu.submit()
+    })
+</script>
+<script>
+    layui.use(['util', 'laydate', 'layer'], function () {
+        var util = layui.util
+
+            , layer = layui.layer;
+        //固定块
+        util.fixbar({
+            bar1: false
+            , bar2: '☺'
+            //,bar2:'#icon-robot'
+            , css: {right: 50, bottom: 100}
+            , bgcolor: '#393D49'
+            , click: function (type) {
+                if (type === 'bar1') {
+                    layer.msg('icon是可以随便换的')
+                } else if (type === 'bar2') {
+                    layer.msg('即将启动机器人...', {
+                        time: 10000, //2s后自动关闭
+                        btn: ['知道啦'],
+                        btnAlign: 'c',
+                        yes: function () {
+                            $('#chat_bot').click();
+                        }
+
+                    });
+
+                }
+            }
+        });
+    });
+</script>
+
+<script>
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            setTop: function () {
+                var that = this;
+                //窗口模式
+                layer.open({
+                    type: 2 //1 表示自定义内容 2表示使用iframe
+                    , title: '我的机器人'
+                    , area: [$(window).width() * 0.5 + 'px', $(window).height() * 0.7 + 'px']
+                    , shade: 0
+                    , id: 'ChatBotPage' //设定一个id，防止重复弹出
+                    , maxmin: true
+
+                    , offset: [ //为了演示，随机坐标
+                        $(window).height() * 0.15
+                        , $(window).width() * 0.3
+                    ]
+                    //  , resize: true //设置可以拉伸
+                    //,content:'<div class="content whisper-content"><div class="cont"><div class="whisper-list"><div class="item-box"><div class="item"><div class="whisper-title"><i class="layui-icon layui-icon-date"></i><span class="hour">12:25</span><span class="date">2018/06/08</span></div><p class="text-cont">大学经常待的地方-图书馆</p><div class="img-box"><img src="../../static/images/library.gif"></div><div class="op-list"><p class="like"><i class="layui-icon layui-icon-praise"></i><span>1200</span></p><p class="edit"><i class="layui-icon layui-icon-reply-fill"></i><span>1200</span></p><p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p></div></div><div class="review-version layui-hide"><div class="form"><img src="../../static/images/header2.png"><form class="layui-form" action=""><div class="layui-form-item layui-form-text"><div class="layui-input-block"><textarea name="desc" class="layui-textarea"></textarea></div></div><div class="layui-form-item"><div class="layui-input-block" style="text-align: right;"><button class="layui-btn definite">確定</button></div></div></form></div><div class="list-cont"><div class="cont"><div class="img"><img src="../../static/images/header.png" alt=""></div><div class="text"><p class="tit"><span class="name">吳亦凡</span><span class="data">2018/06/06</span></p><p class="ct">敢问大师，师从何方？上古高人呐逐一地看完你的作品后，我的心久久 不能平静！这世间怎么可能还有如此精辟的作品？我不敢相信自己的眼睛。自从改革开放以后，我就以为再也不会有任何作品能打动我，没想到今天看到这个如此精妙绝伦的作品好厉害！</p></div></div> </div></div></div></div></div></div>'
+                    , content: 'chat_page_component'
+                });
+            }
+
+
+        };
+
+        $('.layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>
+<script>
+    var form;
+    var files;
+
+    layui.use('upload', function () {
+        var $ = layui.jquery
+            , upload = layui.upload;
+
+
+        //多文件列表示例
+        var demoListView = $('#demoList')
+            , uploadListIns = upload.render({
+            elem: '#testList'
+            //,url: 'upload_resource_process'
+            , method: 'POST'
+            , accept: 'file'
+            , multiple: true
+            , auto: false
+            //,bindAction: '#testListAction'
+
+            , choose: function (obj) {
+
+                files = this.files = obj.pushFile(); //将每次选择的文件追加到文件队列
+                //读取本地文件
+                obj.preview(function (index, file, result) {
+                    var tr = $(['<tr id="upload-' + index + '">'
+                        , '<td>' + file.name + '</td>'
+                        , '<td>' + (file.size / 1014).toFixed(1) + 'kb</td>'
+                        , '<td>等待上传</td>'
+                        , '<td>'
+                        , '<button class="layui-btn layui-btn-xs demo-reload layui-hide">重传</button>'
+                        , '<button class="layui-btn layui-btn-xs layui-btn-danger demo-delete">删除</button>'
+                        , '</td>'
+                        , '</tr>'].join(''));
+
+                    //单个重传
+                    tr.find('.demo-reload').on('click', function () {
+                        obj.upload(index, file);
+                    });
+
+                    //删除
+                    tr.find('.demo-delete').on('click', function () {
+                        delete files[index]; //删除对应的文件
+                        tr.remove();
+                        uploadListIns.config.elem.next()[0].value = ''; //清空 input file 值，以免删除后出现同名文件不可选
+                    });
+
+                    demoListView.append(tr);
+                    getFileNames();
+                });
+            }
+            , done: function (res, index, upload) {
+                if (res.code == 0) { //上传成功
+                    var tr = demoListView.find('tr#upload-' + index)
+                        , tds = tr.children();
+                    tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+                    tds.eq(3).html(''); //清空操作
+                    return delete this.files[index]; //删除文件队列已经上传成功的文件
+                }
+                this.error(index, upload);
+            }
+            , error: function (index, upload) {
+                var tr = demoListView.find('tr#upload-' + index)
+                    , tds = tr.children();
+                tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+                tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+            }
+        });
+
+        {% comment %}  //绑定原始文件域
+          upload.render({
+              elem: '#test20'
+              , url: '/upload/'
+              , done: function (res) {
+                  console.log(res)
+              }
+          });{% endcomment %}
+
+    });
+
+    function getFileNames() {
+        var count = 0;
+        form = new FormData();
+        // form.append("file", files[0]);
+        // 将文件列表加入FormData()中
+        for (let i in files) {
+            form.append("file" + count, files[i]);
+            console.log("--------" + i + "---->" + files[i]);
+            count = count + 1;
+        }
+        // 获得上传的文件总数
+        form.append("files_count", count);
+        // 获得上传的文件类型
+        form.append("resource_type", $("select[name='resource_type']").val());
+
+
+    }
+
+
+    $(document).ready(function () {
+        $("#test").click(function () {
+            alert($("select[name='resource_type']").val())
+        });
+        $("#testListAction").click(function () {
+            $.ajax({
+                url: "upload_resource_process",
+                type: "POST",
+                async: true,// 异步上传
+                data: form,
+                // 告诉jQuery不要去处理发送的数据
+                processData: false,
+                // 告诉jQuery不要去设置Content-Type请求头
+                contentType: false,
+                success: function (data) {
+                    var demoListView = $('#demoList');
+                    demoListView.empty();
+                    // 每次上传成功后将文件列表清空
+                    for (let i in files) {
+                        delete files[i];
+                    }
+                    layer.msg('上传成功', {
+                        icon: 6
+                    });
+                },
+                error: function () {
+                    alert("error");
+                }
+            })
+
+        });
+    });
+</script>
+</body>
+</html>

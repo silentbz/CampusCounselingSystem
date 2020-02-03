@@ -1,0 +1,84 @@
+<ul class="layui-nav">
+
+    <div id="my_div">
+        <li class="layui-nav-item" style="float: left">
+            <a href="back_index">
+
+                <img src="../../../static/images/logo.png" width="40px" height="40px"
+                     style="vertical-align: middle;border-radius: 20px"/>
+
+                <span>Welcome To NanChang HongKong University</span>
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a href="my_notice">我的通知
+                {% if notices %}
+                    <span class="layui-badge" id="notice_num">{{ notices }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li class="layui-nav-item">
+            <a href="person_info">个人中心
+                <!-- <span class="layui-badge-dot"></span> -->
+            </a>
+        </li>
+        <li class="layui-nav-item" lay-unselect="">
+            <a href="javascript:;">
+                 {% if user.user_img  %}
+                      <img src="{{ user.user_img.url }}" class="layui-nav-img">
+                {% else %}
+                      <img src="../../../static/images/default_img.jpg" class="layui-nav-img">
+                {% endif %}
+                {{ user.user_name }}</a>
+           <dl class="layui-nav-child">
+                <dd><a href="change_user_img">修改头像</a></dd>
+                <dd><a href="change_password">修改密码</a></dd>
+                <dd><a href="exit">退出</a></dd>
+            </dl>
+        </li>
+
+    </div>
+</ul>
+
+<br/><br/>
+<div style="margin-left:5%;float: left;">
+    <ul class="layui-nav layui-nav-tree layui-inline" lay-filter="demo" style="margin-right: 10px;">
+        <li class="layui-nav-item layui-nav-itemed">
+            <a href="javascript:;">动态管理</a>
+            <dl class="layui-nav-child">
+                <dd><a href="user_main_page">用户动态</a></dd>
+                <dd><a href="personal_dynamic_info">我的动态</a></dd>
+                <dd><a href="submit_dynamic">发布动态</a></dd>
+            </dl>
+        </li>
+       <li class="layui-nav-item layui-nav-itemed">
+            <a href="javascript:;">问答管理</a>
+            <dl class="layui-nav-child">
+                <dd><a href="question_area">问答频道</a></dd>
+                <dd><a href="personal_question_info">我的提问</a></dd>
+                <dd><a href="submit_question">发出提问</a></dd>
+                <dd><a href="my_reply">我的回答</a></dd>
+            </dl>
+        </li>
+        <li class="layui-nav-item layui-nav-itemed">
+            <a href="javascript:;">我的资源</a>
+            <dl class="layui-nav-child">
+                <dd><a href="my_resource">我的资源</a></dd>
+                <dd><a href="upload_resource">上传资源</a></dd>
+                <dd><a href="download_resource_area">资源广场</a></dd>
+            </dl>
+        </li>
+         <li class="layui-nav-item layui-nav-itemed">
+            <a href="javascript:;">评论点赞</a>
+            <dl class="layui-nav-child">
+                <dd><a href="my_comment">我的评论</a></dd>
+                <dd><a href="my_like">我的点赞</a></dd>
+
+            </dl>
+        </li>
+         <li class="layui-nav-item"><a href="school_news">校园新闻</a></li>
+        <li class="layui-nav-item"><a href="chat_page">我的机器人</a></li>
+    </ul>
+
+</div>
+<button data-method="setTop" id="chat_bot" style="display: none" class="layui-btn">机器人</button>

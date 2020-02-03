@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>首页</title>
+{#    <meta name="renderer" content="webkit">#}
+{#    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">#}
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+     <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <link rel="shortcut icon" href="../../../static/images/logo_ico_128_128.ico" type="image/x-icon"/>
+    <link rel="stylesheet" type="text/css" href="../../../static/css/main.css">
+    <script src="../../../static/js/jquery-3.0.0.min.js"></script>
+    <script src="../../../static/js/bootstrap.js"></script>
+    <script src="../../../static/js/index.js"></script>
+    <script src="../../../static/js/HZRecorder.js"></script>
+
+    <script src="../../../static/js/GeoUtils.js"></script>
+    <script src="../../../static/js/bootstrap.min.js"></script>
+    <script src="../../../static/js/scrollable.js"></script>
+    <script src="../../../static/js/check.js"></script>
+    <script type="text/javascript"
+            src="http://api.map.baidu.com/api?v=2.0&ak=biSevYB7qpodd6tsVvuCSYVZGs3O8A9V"></script>
+    <script type="text/javascript" src="../../../static/layui/layui.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../../static/layui/css/layui.css"/>
+    <style>
+        #place_detail_info li {
+
+            /*display: inline-block;*/
+        }
+
+        /*隐藏地址列表信息*/
+        .hide_place_info {
+            display: none;
+
+        }
+
+        #place_detail_info li a {
+
+            /*color:rgb(193,194,198)*/
+            color: white
+        }
+
+        #place_detail_info li a:hover {
+            list-style: none;
+            cursor: hand;
+            /*display: inline-block;*/
+            color: rgb(30, 159, 255)
+        }
+
+        .myclass {
+            background-color: rgb(102, 102, 102);
+        }
+
+        #my_div {
+            text-align: right;
+        }
+
+        #panorama {
+            width: 100%;
+            height: 92vh;
+        }
+
+        div.main {
+            margin: 0 auto;
+            position: fixed;
+            top: 10%;
+            left: 95%;
+            transform: translate(-50%, 0);
+            z-index: 5000000;
+        }
+    </style>
+</head>
+<body>
+<ul class="layui-nav">
+    <div id="my_div">
+        <li class="layui-nav-item" style="float: left">
+            <p>
+                <img src="../../../static/images/logo.png" width="30px" height="30px"
+                     style="vertical-align: middle;border-radius: 15px"/>
+                <span>Welcome To NanChang HongKong University</span>
+            </p>
+        </li>
+
+        <li class="layui-nav-item">
+            <a href="login">登录</a>
+        </li>
+        <li class="layui-nav-item">
+            <a href="register">注册</a>
+        </li>
+
+    </div>
+</ul>
+<div class="main">
+         
+      {% comment %}<input  id="btn" type="button" value="开始录音" style="background-color: rgba(0,0,0,0.6)"/>{% endcomment %}
+    <button class="layui-btn layui-btn-radius" id="voice_btn"
+            data-toggle="tooltip"
+            data-placement="left"
+
+            title="你可以这样说：‘逸夫楼在哪？’‘软件学院在哪个地方？’‘去大学生活动中心看看’’我想去商业街‘"
+
+            style="width: 200px;">开始录音
+    </button>
+       
+    <form class="layui-form" style="width: 200px;margin-top: 10%;padding-right: 10%">
+        <div class="layui-inline">
+            {% comment %}<label class="layui-form-label">地点搜索</label>{% endcomment %}
+            <div class="layui-input-inline" id="select_place">
+                <select name="modules" lay-verify="required" lay-search="" lay-filter="place">
+                    <option value="">直接选择或搜索选择</option>
+
+
+                    {% for  place in all_places %}
+                        <option value="{{ place.place_name }}">{{ place.place_name }}</option>
+                    {% endfor %}
+
+
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div id="panorama"></div>
+<!-- 隐藏按钮 当用户点击地点标签时候能够将标签弹出-->
+<button data-method="confirmTrans" id="place_info" style="display: none" class="layui-btn">地点框</button>
+
+<button data-method="setTop" id="dynamic_info" style="display: none" class="layui-btn">动态信息栏</button>
+
+
+<div id="places_container" class="hide_place_info">
+
+    <ul id="place_detail_info">
+
+
+        {% for  place in all_places %}
+
+            <li>
+                <a href="javascript:dynamic_info('{{ place.place_name }}')">{{ forloop.counter }}.{{ place.place_name }}</a>
+            </li>
+            <hr/>
+        {% endfor %}
+
+
+    </ul>
+</div>
+</body>
+</html>
+<script>
+    var recorder;
+    var btn = document.getElementById('voice_btn');
+    // 用于判断下一步是开始录音还是结束录音
+    var btn_flag = 0;
+    $("#voice_btn").click(function () {
+        if (btn_flag == 1) {
+            stopRecording()
+        } else {
+            startRecording()
+        }
+    });
+    function startRecording() {
+        HZRecorder.get(function (rec) {
+            recorder = rec;
+            recorder.start();
+            var v_btn = $("#voice_btn");
+            v_btn.text("结束录音");
+            v_btn.removeClass();
+            v_btn.addClass("layui-btn layui-btn-danger layui-btn-radius");
+
+
+            btn_flag = 1
+        });
+    }
+    function stopRecording() {
+        recorder.stop();
+        var v_btn = $("#voice_btn");
+        v_btn.text("开始录音");
+        v_btn.removeClass();
+        v_btn.addClass("layui-btn layui-btn-radius");
+
+
+        btn_flag = 0;
+        uploadAudio();
+    }
+    function uploadAudio() {
+        layer.open({
+            type: 3
+        });
+        recorder.upload("https://api.sillywa.com/api/recognition/", function (state, e) {
+            switch (state) {
+                case 'uploading':
+                    var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+                    console.log(percentComplete);
+                    break;
+                case 'ok':
+                    console.log(JSON.parse(e.target.responseText));
+                    layer.closeAll();
+                    if (e.target.status != 200) {
+                        var result = JSON.parse(e.target.responseText).result;
+                        layer.msg(result)
+                    } else {
+
+                        var result = JSON.parse(e.target.responseText).result[0];
+                        var flag = 0;
+
+                        //   layer.msg("识别成功：" + result, {icon: 1});
+                        {% for place in all_places %}
+                            if (result.indexOf('{{ place.place_name }}') != -1) {
+                                result = '{{ place.place_name }}';
+                                layer.msg("识别成功：" + result, {icon: 1});
+                                flag = 1;
+                                //不等于-1表示该字符串包含子字符串。
+                            }
+                        {% endfor %}
+                        if (flag == 1) { //识别成功将进行展示
+                            dynamic_info(result);
+                        } else {
+                            layer.msg("未找到" + result + "的相关信息", {icon: 2});
+                        }
+
+                    }
+                    break;
+                case 'error':
+                    layer.msg("上传失败");
+                    break;
+                case 'cancel':
+                    layer.msg("上传被取消");
+                    break;
+            }
+        });
+    }
+
+</script>
+
+
+<script>
+    var flag = 0;
+    var label_amount = 2;  //每次加载2个labels
+    var label;
+    var labels_array = new Array();//记录所有的labels_array数据
+    var label_tags_array = new Array(); //记录所有的label_tags数据
+    var tags_name = new Array();// 记录所有的标签名称
+    var count_labels = 0;//记录数据的条数
+    var this_point;//记录当前点的经纬度
+    var init_flag = true;//用户地图全景加载labels初始化
+    var panorama = new BMap.Panorama('panorama', {
+        albumsControl: true, //默认为不显示相册控件，默认值为false
+        linksControl: true, //隐藏道路指示控件
+        navigationControl: false //隐藏导航控件
+    });
+    var temp_label_tag_content = " ";
+
+    $(document).ready(function () {
+        panorama.setPov({  //修改点的视角
+            {#pitch: 22.62497399117345,  //垂直视角（俯仰角）#}
+            pitch: 3.792740413024387,  //垂直视角（俯仰角）
+            {#heading: 267.97925961405264 //水平视角（偏航角）#}
+            heading: 3.792740413024387 //水平视角（偏航角）
+        });
+        panorama.setPosition(new BMap.Point(118.787063,32.059981));
+
+        //panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_CATERING); //餐饮
+        //  panorama.setPov({pitch: 6, heading: 138});
+        this_point = new BMap.Point(118.787063,32.059981);
+        {% for place in all_places %}
+            label = new BMap.Point({{ place.longitude }}, {{ place.latitude }});//定义label的坐标点
+            labels_array[count_labels] = label;
+
+            // 用户现在所在经纬度
+            // panorama.getPosition().lng;
+            // panorama.getPosition().lat;
+
+
+            var tag = {
+                position: label,
+                altitude: {{ place.label_height }}
+
+            };//设置标注点的经纬度位置和高度
+            var label_tag = new BMap.PanoramaLabel('{{ place.place_name }}', tag);
+            label_tags_array[count_labels] = label_tag;
+            var tag_name = '{{ place.place_name }}';
+            tags_name[count_labels] = '{{ place.place_name }}';
+            count_labels = count_labels + 1;//记录有多个labels
+            panorama.addOverlay(label_tag);//在全景地图里添加该标注
+            // 计算加载的labels的经纬度与当前经纬度的距离
+
+            //隐藏标注
+            //label.setContent("");//设置标签内容为空
+
+            console.log("init label_tag_content:--->" + label_tag.getContent());
+
+
+
+
+            panorama.setPov(label_tag.getPov());//修改点的视角 朝向该label
+
+            label_tag.addEventListener('click', function () {
+                label_amount = 2;
+                panorama.setPosition(new BMap.Point({{ place.longitude }}, {{ place.latitude }}));
+
+                this_point = new BMap.Point(panorama.getPosition().lng, panorama.getPosition().lat);
+
+                $("#place_info").click();
+                dynamic_info('{{ place.place_name }}');
+
+            });
+
+            panorama.addEventListener('position_changed', function (e) {
+
+                this_point = new BMap.Point(panorama.getPosition().lng, panorama.getPosition().lat);
+
+                if (flag == 1) { //确保点击地图位置改变并且点击了导航栏的地点或相应的labels标注 才能触发下面事件
+                    //  console.log("panorama position_changed----->flag：" + flag);
+                    panorama.setPov({  //修改点的视角
+
+                        pitch: {{ place.vertical_angle }},    // 俯仰角
+                        heading: {{ place.horizontal_angle }} //偏航角
+
+
+                    });
+                    flag = 0;
+                }
+
+            });//全景位置改变事件
+            init_labels(label, label_tag, tag_name, this_point, 300);
+
+        {% endfor %}
+        // 位置改变时 动态加载相应的labels
+        panorama.addEventListener('position_changed', function (e) {
+            // alert("changed_two");
+            label_amount = 2;
+            // 用户现在所在经纬度
+            // panorama.getPosition().lng;
+            // panorama.getPosition().lat;
+            //alert("changed");
+            var this_point = new BMap.Point(panorama.getPosition().lng, panorama.getPosition().lat);
+            console.log("经度---->" + panorama.getPosition().lng + ",纬度------->" + panorama.getPosition().lat);
+            for (var i = 0; i < count_labels; i++) {
+                //  console.log(label_tags_array[i].getContent());
+                init_labels(labels_array[i], label_tags_array[i], tags_name[i], this_point, 300);
+            }
+
+            init_flag = false;
+        });
+
+    });
+
+
+    function init_labels(label, label_tag, tag_name, this_point, radius) {
+        if (BMapLib.GeoUtils.getDistance(label, this_point) < radius && BMapLib.GeoUtils.getDistance(label, this_point) >= 0) {
+            //   label.setStyle({borderWidth:"1px"});
+            label_tag.setContent(tag_name);//设置标签内容为空
+            //  label.setContent("123");//设置标签内容为空
+            console.log("if true ------>" + label_tag.getContent());
+            if (init_flag == true) { //用于页面加载地图labels初始化
+                temp_label_tag_content = temp_label_tag_content + label_tag.getContent();
+            } else {
+                temp_label_tag_content = " ";
+            }
+            //  label_amount = label_amount - 1;
+
+        } else {
+            //隐藏标注
+            console.log("else------------>" + label_tag.getContent());
+
+            if (temp_label_tag_content.indexOf(label_tag.getContent()) != -1) {
+                console.log("YES");
+                return;
+            }
+
+
+            label_tag.setContent("");//设置标签内容为空
+
+            //label_tag.setStyle({borderWidth: "0", margin: "0", padding: "0"});//设置标签边框宽度为0
+
+
+        }
+    }
+</script>
+<script type="text/javascript" src="../../../static/layui/layui.js"></script>
+
+<script type="text/javascript">
+    layui.config({
+        base: '../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        menu.init();
+        menu.off();
+        // menu.submit()
+    })
+</script>
+
+<script src="../../../static/layui/layui.js" charset="utf-8"></script>
+<script>
+    window.onload = function () {
+        $(".pano_pc_indoor_exit").attr("style", "display:none");
+        $("#place_info").click();
+
+
+    };
+
+</script>
+
+<script>
+
+    var place_value = '';
+    function dynamic_info(val) {
+        temp_label_tag_content=" ";
+        // 在打开新的iframe时 先将之前的iframe全部关闭 保证最后只有一个iframe显示
+        layui.layer.closeAll('iframe');
+        // 用户现在所在经纬度
+        // panorama.getPosition().lng;
+        // panorama.getPosition().lat;
+        // var this_point = new BMap.Point(panorama.getPosition().lng, panorama.getPosition().lat);
+
+
+        flag = 1;
+        $("#place_info").click();
+        place_value = val;
+        switch (val) {
+            {% for place in all_places %}
+                case '{{ place.place_name }}':
+
+                    panorama.setPosition(new BMap.Point({{ place.longitude }}, {{ place.latitude }}));
+
+
+                    panorama.setPov({  //修改点的视角
+
+                        pitch: {{ place.vertical_angle }},    // 俯仰角
+                        heading: {{ place.horizontal_angle }} //偏航角
+
+
+                    });
+
+                    break;
+            {% endfor %}
+
+        }
+        $("#dynamic_info").click();
+    }
+
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            setTop: function () {
+                var that = this;
+                //窗口模式
+                layer.open({
+                    type: 2 //1 表示自定义内容 2表示使用iframe
+                    , title: '动态信息'
+
+                    , skin: 'layui-layer-hui'
+                    , area: [$(window).width() * 0.45 + 'px', $(window).height() * 0.65 + 'px']
+                    , shade: 0
+                    , maxmin: true
+                    // ,id: 'dynamics' //设定一个id，防止重复弹出
+                    , offset: [ //为了演示，随机坐标
+                        $(window).height() * 0.2
+                        , $(window).width() * 0.5
+                    ]
+
+                    //,content:'<div class="content whisper-content"><div class="cont"><div class="whisper-list"><div class="item-box"><div class="item"><div class="whisper-title"><i class="layui-icon layui-icon-date"></i><span class="hour">12:25</span><span class="date">2018/06/08</span></div><p class="text-cont">大学经常待的地方-图书馆</p><div class="img-box"><img src="../../static/images/library.gif"></div><div class="op-list"><p class="like"><i class="layui-icon layui-icon-praise"></i><span>1200</span></p><p class="edit"><i class="layui-icon layui-icon-reply-fill"></i><span>1200</span></p><p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p></div></div><div class="review-version layui-hide"><div class="form"><img src="../../static/images/header2.png"><form class="layui-form" action=""><div class="layui-form-item layui-form-text"><div class="layui-input-block"><textarea name="desc" class="layui-textarea"></textarea></div></div><div class="layui-form-item"><div class="layui-input-block" style="text-align: right;"><button class="layui-btn definite">確定</button></div></div></form></div><div class="list-cont"><div class="cont"><div class="img"><img src="../../static/images/header.png" alt=""></div><div class="text"><p class="tit"><span class="name">吳亦凡</span><span class="data">2018/06/06</span></p><p class="ct">敢问大师，师从何方？上古高人呐逐一地看完你的作品后，我的心久久 不能平静！这世间怎么可能还有如此精辟的作品？我不敢相信自己的眼睛。自从改革开放以后，我就以为再也不会有任何作品能打动我，没想到今天看到这个如此精妙绝伦的作品好厉害！</p></div></div> </div></div></div></div></div></div>'
+                    , content: 'dynamic_for_index?place_value=' + place_value
+                });
+            }
+            , confirmTrans: function () {
+                //配置一个透明的询问框
+                layer.msg($("#places_container").html(), {
+                    area: [$(window).width() * 0.25 + 'px', $(window).height() * 0.65 + 'px'],
+                    time: 200000, //200s后自动关闭
+                    //title: ["places", "background:rbg(71,76,82);color:white;text-align:center"],
+                    offset: 'l',//对话框向左居中,
+                    move: '.layui-layer-title',
+                    //anim: 0平滑放大（默认）1从上掉落 2从最底部往上滑入 3从左滑入 4从左翻滚  5渐显 6抖动
+
+
+                    anim: 1,
+                    btn: ['关闭']
+                });
+
+            }
+
+
+        };
+
+        $('.layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layer = layui.layer
+            , layedit = layui.layedit
+            , laydate = layui.laydate;
+        // 监听用户选择的地点
+        form.on('select(place)', function (data) {
+            //保证选中的值不为空
+            var select_place = data.value;
+            if (select_place != "") {
+                console.log(select_place);
+                //地图将显示指定地点
+                dynamic_info(select_place);
+            }
+        });
+    });
+</script>

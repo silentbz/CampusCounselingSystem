@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>管理员主页</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../static/css/layui.css" media="all">
+    <link rel="shortcut icon" href="../../../static/images/logo_ico_128_128.ico" type="image/x-icon"/>
+
+    <link rel="stylesheet" type="text/css" href="../../../static/css/main.css">
+    <script src="../../../static/js/jquery-3.0.0.min.js"></script>
+    <script src="../../../static/js/jquery-1.11.3.min.js"></script>
+    <script src="../../../static/js/util/jquery_for_comment.js"></script>
+
+
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #my_div {
+            text-align: right;
+
+        }
+    </style>
+</head>
+<body>
+{% include 'admin/admin_nav.html' %}
+
+<div style="margin: 5% auto;width: 80%;">
+    <span class="layui-breadcrumb">
+     <span style="color: rgb(0,150,136)">您现在的位置是:  &nbsp;&nbsp;</span>
+     <a href="back_index">首页</a>
+    <a href="user_main_page">管理员主页</a>
+    <a><cite>用户管理</cite></a>
+    <hr/>
+</span>
+    <br/>
+    {% if all_user %}
+        <table class="layui-table" lay-skin="line">
+            <colgroup>
+                <col width="120">
+                <col width="150">
+                <col width="150">
+                <col width="120">
+                <col width="120">
+                <col width="120">
+                <col width="150">
+                <col width="150">
+                <col width="150">
+            </colgroup>
+            <thead>
+            <tr>
+                <th>编号</th>
+                <th>用户名</th>
+                <th>手机号</th>
+                <th>密码</th>
+                <th>邮箱</th>
+                <th>状态</th>
+                <th>最近登录时间</th>
+                <th>注册时间</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <form action="freeze_user" style="display: none" id="freeze_user" method="post">
+                <input type="text" name="user_id" hidden/>
+            </form>
+            <form action="delete_user" style="display: none" id="delete_user" method="post">
+                <input type="text" name="user_id" hidden/>
+            </form>
+            {% for user in all_user %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ user.user_name }}</td>
+                    <td>{{ user.user_phone }}</td>
+                    <td>{{ user.user_password }}</td>
+                    <td>{{ user.user_email }}</td>
+                    <td class="user_state">{{ user.user_state }}</td>
+                    <td>{{ user.last_login_time|date:"Y/n/j" }}
+                        &nbsp;&nbsp;&nbsp;{{ user.last_login_time|time|cut:"." }}</td>
+                    <td>{{ user.register_time|date:"Y/n/j" }}
+                        &nbsp;&nbsp;&nbsp;{{ user.register_time|time|cut:"." }}</td>
+
+
+                    <td>{% ifequal user.user_state "已冻结" %}
+                        <button class="layui-btn layui-btn-xs layui-btn-normal" user_id="{{ user.id }}">解冻</button>
+
+                    {% else %}
+                        <button class="layui-btn layui-btn-xs" user_id="{{ user.id }}">冻结</button>
+                    {% endifequal %}
+
+                        <button class="layui-btn layui-btn-danger layui-btn-xs" user_id="{{ user.id }}">删除</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+           <div style="text-align: center;margin-left: 32%">
+            <div style="float: left">
+                <a class="layui-btn layui-btn-sm" href="admin_index?page_index=1">第一页</a>
+                {% if all_user.has_previous %}
+                    <a class="layui-btn layui-btn-sm"
+                       href="admin_index?page_index={{ all_user.previous_page_number }}">上一页</a>
+                {% endif %}
+                {% if all_user.has_next %}
+                    <a class="layui-btn layui-btn-sm"
+                       href="admin_index?page_index={{ all_user.next_page_number }}">下一页</a>
+                {% endif %}
+
+
+            </div>
+
+            <div style="float: left;">
+
+                <form style="float: left;" action="admin_index" method="get" name="user_form">&nbsp;&nbsp;跳转至&nbsp;&nbsp;<input
+                        type="number" min="1" name="page_index"
+                        max="{{ all_user.paginator.num_pages }}"
+                        oninput="if( this.value > {{ all_user.paginator.num_pages }} )  this.value = {{ all_user.paginator.num_pages }}"
+                        style="height: 25px;">&nbsp;&nbsp;页&nbsp;&nbsp;
+                     &nbsp;当前第 {{ all_user.number }} 页&nbsp;&nbsp;
+                    &nbsp;共 {{ all_user.paginator.num_pages }} 页&nbsp;&nbsp;
+                </form>
+                <a class="layui-btn layui-btn-sm"
+                   href="admin_index?page_index={{ all_user.paginator.num_pages }}">最后一页</a>
+
+            </div>
+
+
+        </div>
+    {% else %}
+        <blockquote class="layui-elem-quote" style="margin-top: 10px;">
+            <div id="test2">暂无用户信息</div>
+        </blockquote>
+    {% endif %}
+</div>
+
+
+</div>
+<div class="site-demo-button" id="layerDemo" style="margin-bottom: 0;display: none;">
+    <button data-method="offset" data-type="auto" class="layui-btn layui-btn-normal" id="hint">居中弹出</button>
+</div>
+<script type="text/javascript" src="../../../static/layui/layui.js"></script>
+
+
+<script>
+    layui.use('element', function () {
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+        {% comment %}  //监听导航点击
+          element.on('nav(demo)', function(elem){
+              //console.log(elem)
+              layer.msg(elem.text());
+          });{% endcomment %}
+    });
+</script>
+<script type="text/javascript">
+    layui.config({
+        base: '../../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        menu.init();
+        menu.off();
+        menu.submit()
+    })
+</script>
+<script>
+    layui.use(['util', 'laydate', 'layer'], function () {
+        var util = layui.util
+
+            , layer = layui.layer;
+        //固定块
+        util.fixbar({
+            bar1: false
+            , bar2: '☺'
+            //,bar2:'#icon-robot'
+            , css: {right: 50, bottom: 100}
+            , bgcolor: '#393D49'
+            , click: function (type) {
+                if (type === 'bar1') {
+                    layer.msg('icon是可以随便换的')
+                } else if (type === 'bar2') {
+                    layer.msg('即将启动机器人...', {
+                        time: 10000, //2s后自动关闭
+                        btn: ['知道啦'],
+                        btnAlign: 'c',
+                        yes: function () {
+                            $('#chat_bot').click();
+                        }
+
+                    });
+
+                }
+            }
+        });
+    });
+</script>
+<script>
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            setTop: function () {
+                var that = this;
+                //窗口模式
+                layer.open({
+                    type: 2 //1 表示自定义内容 2表示使用iframe
+                    , title: '我的机器人'
+                    , area: [$(window).width() * 0.5 + 'px', $(window).height() * 0.7 + 'px']
+                    , shade: 0
+                    , id: 'ChatBotPage' //设定一个id，防止重复弹出
+                    , maxmin: true
+
+                    , offset: [ //为了演示，随机坐标
+                        $(window).height() * 0.15
+                        , $(window).width() * 0.3
+                    ]
+                    //  , resize: true //设置可以拉伸
+                    //,content:'<div class="content whisper-content"><div class="cont"><div class="whisper-list"><div class="item-box"><div class="item"><div class="whisper-title"><i class="layui-icon layui-icon-date"></i><span class="hour">12:25</span><span class="date">2018/06/08</span></div><p class="text-cont">大学经常待的地方-图书馆</p><div class="img-box"><img src="../../../static/images/library.gif"></div><div class="op-list"><p class="like"><i class="layui-icon layui-icon-praise"></i><span>1200</span></p><p class="edit"><i class="layui-icon layui-icon-reply-fill"></i><span>1200</span></p><p class="off"><span>展开</span><i class="layui-icon layui-icon-down"></i></p></div></div><div class="review-version layui-hide"><div class="form"><img src="../../../static/images/header2.png"><form class="layui-form" action=""><div class="layui-form-item layui-form-text"><div class="layui-input-block"><textarea name="desc" class="layui-textarea"></textarea></div></div><div class="layui-form-item"><div class="layui-input-block" style="text-align: right;"><button class="layui-btn definite">確定</button></div></div></form></div><div class="list-cont"><div class="cont"><div class="img"><img src="../../../static/images/header.png" alt=""></div><div class="text"><p class="tit"><span class="name">吳亦凡</span><span class="data">2018/06/06</span></p><p class="ct">敢问大师，师从何方？上古高人呐逐一地看完你的作品后，我的心久久 不能平静！这世间怎么可能还有如此精辟的作品？我不敢相信自己的眼睛。自从改革开放以后，我就以为再也不会有任何作品能打动我，没想到今天看到这个如此精妙绝伦的作品好厉害！</p></div></div> </div></div></div></div></div></div>'
+                    , content: 'chat_page_component'
+                });
+            }
+
+
+        };
+
+        $('.layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>
+
+<script>
+
+    // 按回车键触发事件 提交分页表单
+    $(document).keyup(function (event) {
+        if (event.keyCode == 13) {
+            var page_index = $("input[name='page_index']").val();
+
+
+            // 判断用户是否输入页码
+            if (page_index.trim() == "") {
+
+                $("#hint").click();
+                return;
+            }
+
+
+            $("form[name='user_form']").submit();
+
+
+        }
+    });
+</script>
+<script>
+    layui.use('layer', function () { //独立版的layer无需执行这一句
+        var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
+
+        //触发事件
+        var active = {
+            offset: function (othis) {
+                var type = othis.data('type')
+                    , text = "请输入页码";
+
+                layer.open({
+                    type: 1
+                    , offset: type
+
+                    , id: 'layerDemo' + type //防止重复弹出
+                    , content: '<div style="padding: 20px 80px;">' + text + '</div>'
+                    , btn: '关闭'
+                    , btnAlign: 'r' //按钮居右
+                    , shade: 0 //不显示遮罩
+                    , yes: function () {
+                        layer.closeAll();
+                    }
+                });
+            }
+        };
+
+        $('#layerDemo .layui-btn').on('click', function () {
+            var othis = $(this), method = othis.data('method');
+            active[method] ? active[method].call(this, othis) : '';
+        });
+
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $(".layui-btn-xs").click(function () {
+            //通过按钮获得相应的notice_id值
+
+            var flag = 0;
+            var user_id = $(this).attr("user_id");
+            console.log(user_id);
+            // 将notice_id 赋值到输入域
+            if ($(this).text() == "冻结") {
+                layui.layer.msg('冻结成功', {
+                    icon: 6
+                });
+                $(this).text("解冻");
+                $(this).removeClass();
+                $(this).addClass("layui-btn layui-btn-xs layui-btn-normal");
+                $(this).parent().parent().find(".user_state").text("已冻结");
+                freeze_user(user_id);
+                flag = 1;
+            }
+            if ($(this).text() == "解冻") {
+                if (flag == 0) {
+                    layui.layer.msg('解冻成功', {
+                        icon: 6
+                    });
+                    $(this).text("冻结");
+                    $(this).removeClass();
+                    $(this).addClass("layui-btn layui-btn-xs");
+                    $(this).parent().parent().find(".user_state").text("正常");
+                    unfreeze_user(user_id);
+                }
+            }
+            if ($(this).text() == "删除") {
+                var this_tr = $(this);
+                layui.layer.confirm('确定要删除吗?', {
+                    btnAlign: 'c'
+                }, function (index) {
+                    //点击确定后的回调
+                    //do something
+                    layui.layer.msg('删除成功', {
+                        icon: 6
+                    });
+
+                    this_tr.parent().parent().remove();
+                    delete_user(user_id);
+                    layer.close(index);
+                });
+
+
+            }
+
+
+        });
+
+    });
+    // 冻结用户
+    function freeze_user(user_id) {
+        $.ajax({
+
+            'type': "POST",
+            'data': {user_id: user_id},
+            'url': 'freeze_user',  //访问的url地址
+            'dateType': 'json'  //想要获得的返回数据类型
+        }).success(function (data) {  //执行成功的回调函数（含有返回的数据（data））
+
+        });
+    }
+    // 用户解冻
+    function unfreeze_user(user_id) {
+        $.ajax({
+
+            'type': "POST",
+            'data': {user_id: user_id},
+            'url': 'unfreeze_user',  //访问的url地址
+            'dateType': 'json'  //想要获得的返回数据类型
+        }).success(function (data) {  //执行成功的回调函数（含有返回的数据（data））
+
+        });
+    }
+    // 删除用户
+    function delete_user(user_id) {
+        $.ajax({
+
+            'type': "POST",
+            'data': {user_id: user_id},
+            'url': 'delete_user',  //访问的url地址
+            'dateType': 'json'  //想要获得的返回数据类型
+        }).success(function (data) {  //执行成功的回调函数（含有返回的数据（data））
+
+        });
+    }
+</script>
+</body>
+</html>

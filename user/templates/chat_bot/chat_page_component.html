@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html><head>
+    <title>Chat</title>
+    <meta charset="utf-8">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link href="../../../static/css/bubble.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+    <script src="../../../static/js/jquery-1.11.3.min.js"></script>
+
+</head>
+<body>
+<div class="container-fluid h-100">
+    <div class="row justify-content-center h-100">
+
+        <div class="col-md-8 col-xl-6 chat">
+            <div class="card">
+                <div class="card-header msg_head">
+                    <div class="d-flex bd-highlight">
+                        <div class="img_cont">
+                            <img src="../../../static/images/robot_one.gif" class="rounded-circle user_img">
+                            <span class="online_icon"></span>
+                        </div>
+                        <div class="user_info">
+                            <span>机器人小紫</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="action_menu" style="display: none;">
+                        <ul>
+                            <li><i class="fas fa-user-circle"></i> View profile</li>
+                            <li><i class="fas fa-users"></i> Add to close friends</li>
+                            <li><i class="fas fa-plus"></i> Add to group</li>
+                            <li><i class="fas fa-ban"></i> Block</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card-body msg_card_body" id="card-body">
+
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <div class="input-group-append">
+                            <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                        </div>
+                        <input name="" class="form-control type_msg" placeholder="按回车键发送或点击发送图标" id="mytext">
+                        <div class="input-group-append">
+                            <span class="input-group-text send_btn"><i class="fas fa-location-arrow" id="myicon"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var message="我是机器人小紫，有什么需要我帮助的嘛？";
+    function formatAMPM(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes + ' ' + ampm;
+        return strTime;
+    }
+    function send_message(str)
+
+    {
+
+        if (str.length==0)
+
+        {
+
+            message="";
+
+            return;
+
+        }
+
+        xmlHttp=GetXmlHttpObject();
+
+        if (xmlHttp==null)
+
+        {
+
+            alert ("您的浏览器不支持AJAX！");
+
+            return;
+
+        }
+
+        var url="http://www.tuling123.com/openapi/api?key=2ec2f55318d9444ebee31df4b7baa064";
+
+        url=url+"&info="+str;
+
+        url=url+"&userid=1234" ;
+
+        xmlHttp.onreadystatechange=stateChanged;
+
+        xmlHttp.open("GET",url,true);
+
+        xmlHttp.send(null);
+
+        // document.getElementById("robot").value="";
+
+    }
+
+    function stateChanged()
+
+    {
+
+        if (xmlHttp.readyState==4)
+
+        {
+
+            var msg=eval('(' + xmlHttp.responseText + ')');
+
+
+
+//            document.getElementById("txtHint").innerHTML=msg.text;
+            message=msg.text;
+//            alert("message--->",message);
+            insertChat("me",message);
+
+        }
+
+    }
+
+    function GetXmlHttpObject()
+
+    {
+
+        var xmlHttp=null;
+
+        try
+
+        {
+
+            // Firefox, Opera 8.0+, Safari
+
+            xmlHttp=new XMLHttpRequest();
+
+        }
+
+        catch(e)
+
+        {
+
+            // Internet Explorer
+
+            try
+
+            {
+
+                xmlHttp=new ActiveXObject("Msxml2.XMLHTTP");
+
+            }
+
+            catch (e)
+
+            {
+
+                xmlHttp=new ActiveXObject("Microsoft.XMLHTTP");
+
+            }
+
+        }
+
+        return xmlHttp;
+
+    }
+    function insertChat(who, text, time){
+        if (time === undefined){
+            time = 0;
+        }
+        var control = "";
+//        alert("entered");
+        var date = formatAMPM(new Date());
+
+        if (who == "me"){
+
+
+
+
+
+
+
+            control = '<div class="d-flex justify-content-start mb-4">' +
+                    '<div class="img_cont_msg">' +
+                    ' <img src="../../static/images/robot_one.gif" class="rounded-circle user_img_msg"></div>' +
+                    '<div class="msg_cotainer" style="min-width: 150px">'+ text +
+                    '<span class="msg_time" style="margin-top: 10px">'+date+'</span>' +
+                    '</div>' +
+                    '</div>';
+        }else{
+
+
+            control = '<div class="d-flex justify-content-end mb-4">' +
+                    '<div class="msg_cotainer_send" style="min-width: 150px">'+ text +
+                    '<span class="msg_time_send" style="margin-top: 10px">'+date+'</span>' +
+                    '</div>' +
+                    '<div class="img_cont_msg">' +
+                    ' <img src="//t.cn/RCzsdCq" class="rounded-circle user_img_msg"></div>' +
+                    '</div>';
+        }
+        setTimeout(
+                function(){
+//                    $("#card-body").append(control).scrollTop($("ul").prop('scrollHeight'));
+                    $("#card-body").append(control).scrollTop($("#card-body").prop('scrollHeight'));
+                }, time);
+
+    }
+</script>
+<script>
+    $(document).ready(function(){
+        insertChat("me", message);
+        $("#mytext").on("keydown", function(e){
+
+            if (e.which == 13){ //回车键触发事件
+
+                var text = $(this).val();
+                if (text !== ""){
+//                    alert("ok"+text);
+
+                    insertChat("you",text);
+                    send_message(text);
+
+                    $(this).val('');
+                }
+            }
+        });
+
+        $('#myicon').click(function(){
+            $("#mytext").trigger({type: 'keydown', which: 13, keyCode: 13});
+        });
+    });
+</script>
+
+
+</body></html>

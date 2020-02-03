@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>校园新闻</title>
+    <meta name="renderer" content="webkit">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../../../static/css/school_news/layui/css/layui.css" media="all">
+    <link rel="shortcut icon" href="../../../static/images/logo_ico_128_128.ico" type="imagmie/x-icon"/>
+
+
+    <link rel="stylesheet" type="text/css" href="../../../static/css/news_style.css">
+
+    <script src="../../../static/js/jquery-3.0.0.min.js"></script>
+    <script src="../../../static/js/jquery-1.11.3.min.js"></script>
+    <script src="../../../static/js/util/jquery_for_comment.js"></script>
+    <script src="../../../static/js/upload_picture.js"></script>
+
+
+    <!--加载meta IE兼容文件-->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        #my_div {
+            text-align: right;
+
+        }
+
+        body {
+            /* background-color: rgb(214,214,214);*/
+
+        }
+    </style>
+</head>
+<body class="lay-blog">
+
+{% include 'index/nav.html' %}
+
+
+<div style="float: left ;margin-left: 5%;width: 60%;">
+    <span class="layui-breadcrumb">
+     <span style="color: rgb(0,150,136)">您现在的位置是:  &nbsp;&nbsp;</span>
+     <a href="back_index">首页</a>
+    <a href="user_main_page">用户主页</a>
+    <a><cite>校园新闻</cite></a>
+    <hr/>
+</span>
+    <br/>
+
+    {% if school_news %}
+        <div class="container-wrap" style="padding: 0">
+            <div class="container container-message container-details">
+
+                <div class="contar-wrap" id="new_container">
+
+                    {% for news in school_news %}
+                        <div class="item">
+
+                            <div class="item-box  layer-photos-demo1 layer-photos-demo">
+                                <h3><a>{{ news.news_title }}</a></h3>
+                                <h5>
+                                    管理员发布于：<span
+                                        style="color: orange;">{{ news.news_time|time|cut:"." }} {{ news.news_time|date:"Y/n/j" }}</span>
+                                </h5>
+                                <p>{{ news.news_content }}</p>
+                                {% if news.news_img %}
+                                    <img src="{{ news.news_img.url }}" alt="" layer-index="0"
+                                         style="width: 300px;height: 280px;">
+                                {% endif %}
+
+
+                            </div>
+                        </div>
+                    {% endfor %}
+
+
+                </div>
+            </div>
+        </div>
+    {% else %}
+
+            <blockquote class="layui-elem-quote" style="margin-top: 10px;">
+                <div id="test2" style="font-size: 15px;">暂无任何新闻信息</div>
+            </blockquote>
+
+    {% endif %}
+
+</div>
+
+<script type="text/javascript" src="../../../static/layui/layui.js"></script>
+<script>
+    layui.config({
+        base: '../../static/js/'
+    }).use('blog');
+</script>
+
+<!-- -->
+<script>
+    layui.use('element', function () {
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+        {% comment %}  //监听导航点击
+          element.on('nav(demo)', function(elem){
+              //console.log(elem)
+              layer.msg(elem.text());
+          });{% endcomment %}
+    });
+</script>
+<script type="text/javascript">
+    layui.config({
+        base: '../../static/js/util'
+    }).use(['element', 'laypage', 'form', 'menu','blog'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        menu.init();
+        menu.off();
+        menu.submit()
+    })
+</script>
+
+
+<script type="text/javascript" src="../../../static/layui/layui.js"></script>
+
+<script>
+    layui.use('element', function () {
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        //监听导航点击
+        element.on('nav(demo)', function (elem) {
+            //console.log(elem)
+            layer.msg(elem.text());
+        });
+    });
+</script>
+<script type="text/javascript">
+    layui.config({
+        base: '../../static/js/util/'
+    }).use(['element', 'laypage', 'form', 'menu','blog'], function () {
+        element = layui.element, laypage = layui.laypage, form = layui.form, menu = layui.menu;
+        laypage.render({
+            elem: 'demo'
+            , count: 70 //数据总数，从服务端得到
+        });
+        menu.init();
+        menu.off();
+        menu.submit()
+    })
+</script>
+<script>
+    layui.use(['util', 'laydate', 'layer','blog'], function () {
+        var util = layui.util
+
+            , layer = layui.layer;
+        //固定块
+        util.fixbar({
+            bar1: false
+            , bar2: '☺'
+            //,bar2:'#icon-robot'
+            , css: {right: 50, bottom: 100}
+            , bgcolor: '#393D49'
+            , click: function (type) {
+                if (type === 'bar1') {
+                    layer.msg('icon是可以随便换的')
+                } else if (type === 'bar2') {
+                    layer.msg('即将启动机器人...', {
+                        time: 10000, //2s后自动关闭
+                        btn: ['知道啦'],
+                        btnAlign: 'c',
+                        yes: function () {
+                            $('#chat_bot').click();
+                        }
+
+                    });
+
+                }
+            }
+        });
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+  <div class="list-cont">
+
+                                {% for comments in   all_comments.values  %}
+                                    {% for comment in comments %}
+                                      <!-- 保证只加载本动态下的所有评论 -->
+                                        {% ifequal comment.dynamic_info dynamic %}
+
+                                <div class="cont">
+                                    <div class="img">
+                                        <img src="../../static/images/header.png" alt="">
+                                    </div>
+                                    <div class="text">
+                                        <p class="tit"><span class="name">{{ comment.critic_name }}</span><span
+                                                class="data">{{ comment.comment_time|date:"Y/n/j"}}</span></p>
+                                        <p class="ct">{{ comment.comment_content}}</p>
+                                    </div>
+                                </div>
+                                        {% endifequal %}
+                                {% endfor %}
+                        {% endfor %}
+
+                            </div>
