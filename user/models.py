@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # 用户信息表
 class User(models.Model):
     # 用户名
