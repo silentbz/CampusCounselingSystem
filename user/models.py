@@ -51,6 +51,7 @@ class DynamicInfo(models.Model):
 
     class Meta:
         db_table = 'dynamic_info'
+
 # 版块信息表
 class DynamicTopic(models.Model):
     # 版块id
