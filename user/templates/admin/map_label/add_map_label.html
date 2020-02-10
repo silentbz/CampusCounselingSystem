@@ -143,12 +143,25 @@
     var vertical_angle = 0;//仰俯角度 对应pitch
     var horizontal_angle = 0;//水平角度 对应heading
     $(document).ready(function () {
+
+        panorama.setPov({  //修改点的视角
+            {#pitch: 22.62497399117345,  //垂直视角（俯仰角）#}
+           pitch: 0.11722666873818947,  //垂直视角（俯仰角）
+            {#heading: 267.97925961405264 //水平视角（偏航角）#}
+            heading: 354.4238391495137 //水平视角（偏航角）
+        });
+        {#panorama.setPosition(new BMap.Point(118.787072,32.059983));#}
+        panorama.setPosition(new BMap.Point(118.786996,32.060187));
+
+        //118.787072,32.059983
+        {% comment %}panorama.setPosition(new BMap.Point(118.787072,32.059983));
+
         panorama.setPov({  //修改点的视角
             pitch: 22.62497399117345,  //垂直视角（俯仰角）
             heading: 267.97925961405264 //水平视角（偏航角）
         });
         panorama.setPosition(new BMap.Point(115.835695, 28.657046));
-
+{% endcomment %}
         //panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_CATERING); //餐饮
         //  panorama.setPov({pitch: 6, heading: 138});
 
