@@ -81,9 +81,9 @@
     <div id="my_div">
         <li class="layui-nav-item" style="float: left">
             <p>
-                <img src="../../../static/images/logo.png" width="30px" height="30px"
+                <img src="../../../static/images/nanda_logo.jpg" width="30px" height="30px"
                      style="vertical-align: middle;border-radius: 15px"/>
-                <span>Welcome To NanChang HongKong University</span>
+                <span>Welcome To NanJing University</span>
             </p>
         </li>
 
@@ -98,8 +98,9 @@
 </ul>
 <div class="main">
          
+
       {% comment %}<input  id="btn" type="button" value="开始录音" style="background-color: rgba(0,0,0,0.6)"/>{% endcomment %}
-    <button class="layui-btn layui-btn-radius" id="voice_btn"
+    {% comment %}<button class="layui-btn layui-btn-radius" id="voice_btn"
             data-toggle="tooltip"
             data-placement="left"
 
@@ -107,7 +108,7 @@
 
             style="width: 200px;">开始录音
     </button>
-       
+       {% endcomment %}
     <form class="layui-form" style="width: 200px;margin-top: 10%;padding-right: 10%">
         <div class="layui-inline">
             {% comment %}<label class="layui-form-label">地点搜索</label>{% endcomment %}
@@ -259,11 +260,12 @@
     $(document).ready(function () {
         panorama.setPov({  //修改点的视角
             {#pitch: 22.62497399117345,  //垂直视角（俯仰角）#}
-            pitch: 3.792740413024387,  //垂直视角（俯仰角）
+            pitch: 0.11722666873818947,  //垂直视角（俯仰角）
             {#heading: 267.97925961405264 //水平视角（偏航角）#}
-            heading: 3.792740413024387 //水平视角（偏航角）
+            heading: 354.4238391495137 //水平视角（偏航角）
         });
-        panorama.setPosition(new BMap.Point(118.787063,32.059981));
+        //118.787072,32.059983
+        panorama.setPosition(new BMap.Point(118.787072,32.059983));
 
         //panorama.setPanoramaPOIType(BMAP_PANORAMA_POI_CATERING); //餐饮
         //  panorama.setPov({pitch: 6, heading: 138});
