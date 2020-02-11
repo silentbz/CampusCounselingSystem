@@ -82,6 +82,7 @@
                                         class="layui-icon layui-icon-reply-fill"></i><span>{{ dynamic.dynamic_comments }}</span>
                                 </p>
                                 <!-- 用户只能删除自己发的动态 -->
+
                                 {% ifequal dynamic.user.id user.id %}
                                     <p style="padding-left: 10%" dynamic_id="{{ dynamic.id }}" id="delete_dynamic">
                                         <span>删除</span><i
