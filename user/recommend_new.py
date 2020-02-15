@@ -44,6 +44,7 @@ def get_sim_users_id(users_array, input_user_id, users_length):
             # 计算当前权重
             temp_weight = np.sqrt(np.sum(res ** 2))
 
+
             # 自定义阈值 temp_weight /(2.6*sum_res_weight)
             sim = 1.0 / (1 + temp_weight / (2.6 * sum_res_weight))  # 求取相似度
             #print(sim)
