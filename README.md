@@ -12,7 +12,7 @@ mysqlclient、numpy、django、Pillow
 
 分别使用pip install 进行安装
 
-# 项目结构
+# 项目架构
 
 python web框架：django
 
