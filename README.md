@@ -17,7 +17,7 @@ python web框架：django
 
 # 项目部署
 
-1.项目git clone之后
+1.项目git clone之后<br/>
 2.创建数据库compuscounseling
 3.修改数据库配置，在settings.py文件中修改DATABASES属性值
 4.在项目根目录下运行：python manage.py migrate
@@ -25,7 +25,7 @@ python web框架：django
 
 # 项目运行
 
-运行前提条件：JDK1.8、Python3.6+
+运行前提条件：JDK1.8、Python3.x+
 
 python manage.py runserver 0.0.0.0:port
 
