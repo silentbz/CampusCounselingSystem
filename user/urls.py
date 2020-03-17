@@ -133,6 +133,7 @@ urlpatterns = [
     path('delete_dynamic_topic', delete_dynamic_topic),
 
     # 标注管理--------------------------------------------------------------------
+
     # 查看标注
     path('check_map_label', check_map_label),
     # 添加标注
