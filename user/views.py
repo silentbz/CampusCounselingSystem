@@ -22,10 +22,10 @@ import  datetime
 import numpy as np
 import user.recommend_new as recommend
 from django.core.paginator import Paginator
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 
-
-# Create your views here.
 # 首页------------------------------------------------------------------------------------------
+@xframe_options_sameorigin
 def index(request):
     print("ok entered!")
     # 加载全景图中所有的标注
@@ -310,7 +310,7 @@ def edit_person_info(request):
 #     dynamic_info = models.DynamicInfo.objects.all()
 #     return render(request, "user_dynamic_result.html", {"dynamic_info": dynamic_info})
 
-
+@xframe_options_sameorigin
 def dynamic_for_index(request):
     place_value = request.GET['place_value']
     dynamic_topic = ""
@@ -1276,6 +1276,7 @@ def school_news(request):
 
 
 # 聊天机器人----------------------------------------------------------------------------------
+@xframe_options_sameorigin
 def chat_page(request):
     user = request.session.get('user', None)
     # 用户如果没有登录 跳转到登录界面
@@ -1286,7 +1287,7 @@ def chat_page(request):
 
     return render(request, "chat_bot/chat_page.html", {"notices": my_notices, "user": user})
 
-
+@xframe_options_sameorigin
 def chat_page_component(request):
     return render(request, "chat_bot/chat_page_component.html")
 
