@@ -1041,13 +1041,16 @@ def get_code(request):
     for num in range(1, 5):
         code = code + str(random.randint(0, 9))
     print(code)
-    client = smsclient.ZhenziSmsClient('http://sms_developer.zhenzikj.com', '100931',
+    try:
+        client = smsclient.ZhenziSmsClient('http://sms_developer.zhenzikj.com', '100931',
                                        'ca7f2b7c-1778-4ef4-abc9-fa0206f499eb')
+    except Exception as e:
+        pass
 
     uinfo = {}
     hd_user_name = ""
     hd_user_phone = request.POST['hd_user_phone']
-    print(client.send(hd_user_phone, '校园咨询网站欢迎您注册，您的验证码为' + code))
+    print(client.send(hd_user_phone, '校园论坛网站欢迎您注册，您的验证码为' + code))
     hd_user_password = ""
     hd_user_email = ""
     uinfo['valid_code'] = code

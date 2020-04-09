@@ -234,7 +234,7 @@
         /** 校验手机号*/
         /** 校验电话号码是否合法*/
         function checkPhone(val) {
-            var ex = /^1[3|4|5|8][0-9]\d{4,8}$/;
+            var ex = /^1[3|4|5|6|7|8|9][0-9]\d{4,8}$/;
             if (!ex.test(val)) {
                 return true;//校验用户输入不合法返回true
             } else return false;
@@ -382,7 +382,7 @@
 
     </div>
 </div>
-<form action="get_code" method="POST" hidden="hidden" id="hd_form">
+<form action="get_code" method="post" hidden="hidden" id="hd_form">
     <input type="text" id="hd_user_name" name="hd_user_name"/>
     <input type="text" id="hd_user_phone" name="hd_user_phone"/>
     <input type="password" id="hd_user_password" name="hd_user_password"/>
