@@ -42,5 +42,10 @@ port可指定
 
 eg：python manage.py runserver 0.0.0.0:9000
 
+# 项目账号登录
+
+用户端通过手机号注册登录
+
+管理员端登录账号密码均为admin
 
 
